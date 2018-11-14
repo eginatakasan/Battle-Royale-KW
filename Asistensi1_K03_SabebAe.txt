@@ -1,0 +1,126 @@
+Kelompok 6 
+"Sabeb Ae"
+
+Anggota Kelompok:
+1. Winston Wijaya	13517018
+2. Eginata Kasan	13517030
+3. Vivianni		13517060
+4. Jofiandy Leonata	13517135
+
+
+- Weapon
+Jumlah Weapon yang tersedia : 5
+List Weapon : Pistol(35, 1), AK-47(50, 2), Frying Pan(30, No Ammo), Shotgun(60, 3), Chicken(25, No Ammo). 
+Special Case Weapon : Tangan (10, No Ammo) -> Ketika awal permainan dan ketika tidak equip weapon apapun
+
+- Armor
+Jumlah Armor yang tersedia : 3
+List Armor : Helmet(10), Vest(20), Shoes(5)
+
+- Ammo
+Maksimal Slot ammo pada senjata adalah : 6
+
+
+- Magazine
+Jumlah Ammo yang tersedia : 3
+List Ammo : Pistol, AK-47, Shotgun
+1 Magazine mengisi 3 ammo.
+
+- Medicine
+Heal health player sebesar : 30
+
+- Inventory
+Maksimum Inventory yang bisa di bawa adalah : 5
+
+- Status Awal
+Player
+Health 		: 100
+Weapon		: Tangan Kosong
+Armor 		: None
+Inventory 	: None
+
+Enemy
+Health		: 5 (Sekali Tembak mati)
+Weapon		: Random
+Armor		: Random
+Drop Item	: Weapon and Armor
+
+
+Spesifikasi Permainan:
+1. Pemain
+	Pemain akan memulai dari tempat random pada Map. Inventory Awal sesuai dengan spek dari Status Awal.
+
+2. Musuh
+	Musuh awal akan dibuat sebanyak	6. Musuh akan di spawn di tempat yang random juga pada map. Musuh akan diberikan inventory awal yang 
+sesuai dengan status awal dari Enemy. Pergerakan musuh akan dilakukan secara random. Musuh akan melakukan penyerangan apabila kita menempati Posisi yang sama. 
+
+3. Map
+	Ukuran map 15x15 dimana Tiap 7 kali gerakan, map dishrink. Player tidak dapat bergerak ke daerah inaccessible tapi apabila player berada di posisi saat map di shrink maka dia akan mati.
+Legenda dari Map:
+W = weapon
+A = armor
+M = medicine
+O = ammo
+P = player
+E = enemy
+- = accessible
+X = inaccessible
+
+Bentuk Kasar dari Map
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+X P - - - - - - - - - - - - - - X
+X - - - - - - - - - - - - - - - X
+X - - - - - - - - - - - - - - - X
+X - - - - - - - - - - - - - - - X
+X - - - - - - - - - - - - - - - X
+X - - - - - - - - - - - - - - - X
+X - - - - - - - - - - - - - - - X
+X - - - - - - - - - - - - - - - X
+X - - - - - - - - - - - - - - - X
+X - - - - - - - - - - - - - - - X
+X - - - - - - - - - - - - - - - X
+X - - - - - - - - - - - - - - - X
+X - - - - - - - - - - - - - - - X
+X - - - - - - - - - - - - - - - X
+X - - - - - - - - - - - - - - - X
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+4. Object
+	Terdapat beberapa objek yang tersebar pada peta. Object tersebut akan dispawn secara random dimana spawn-ing dari Magazine akan lebih banyak sehingga mengurangi kemungkinan adanya weapon tanpa ammo. Object-Object yang bisa dispawn:
+- Weapon (5 Jenis)
+- Armor (3 Jenis)
+- Medicine
+- Magazine (3 Jenis)
+Object akan dianggap sebagai benda yang berbeda sehingga apabila ada 2 object dengan nama yang sama maka mereka akan menempatkan 2 slot inventory.
+
+5, Fail State
+	Kondisi Fail terjadi ketika health mencapai 0 (apabila diserang weapon maupun masuk dalam deadzone). Hal ini juga berlaku unuk musuh.
+
+6. Goal State
+	Kondisi Menang terjadi ketika pemain menjadi player yang tersisa pada permainan ini.
+
+7. Save & Load
+	Program dapat menyimpan state permainan ke file eksternal. Format penulisan state pada file eksternal dibebaskan kepada Anda. Program juga dapat melakukan load state permainan dari file eksternal hasil save.
+
+8. Bonus
+	a) Dapat terjadi barang baru secara periodik
+	b) Adanya item bag
+
+List command yang dapat digunakan :
+a.	Start /0 : memulai permainan, menampilkan judul dan instruksi permainan.
+b.	Help /0 : menampilkan fungsi-fungsi yang dapat dipanggil dalam permainan, dapat mengandung informasi lain yang mungkin dibutuhkan.
+c.	Quit /0 : mengakhiri permainan.
+d.	Look /0 : menuliskan petak-petak 3x3 di sekitar pemain dengan posisi pemain saat ini menjadi center. Dalam petak-petak tersebut tampilkan 			  simbol untuk objek yang ada di petak tersebut.  Skala prioritas penampilan peta: Enemy > Medicine > Weapon > Armor > Ammo > pemain. 		  	  Jika ada lebih dari satu objek pada petak tersebut, tampilkan yang memiliki prioritas tertinggi. Khusus untuk petak posisi pemain 			  saat ini, berikan deskripsi mengenai objek yang ada pada petak tersebut. Contoh dapat dilihat pada bagian E.
+e. 	Map /0 : memperlihatkan seluruh peta permainan dengan menunjukkan petak deadzone dan petak safezone, serta lokasi pemain.
+f.	n /0, e /0, s /0, w /0 : menggerakkan pemain dari satu petak ke petak lain sesuai dengan arah mata angin (n = north, e = east, s = 					south, w = west).
+g. 	Take /1 : mengambil objek yang berada pada petak yang sama dengan pemain dan memasukkannya ke dalam inventory. Command gagal ketika tidak ada 			  objek yang sesuai dengan input atau inventory pemain penuh.
+h.	Drop /1 : menjatuhkan objek yang ada dalam inventory pemain ke petak yang ditempati pemain saat ini. Objek yang dijatuhkan dapat diambil 			  kembali. Command gagal ketika tidak ada objek yang sesuai dengan input pada inventory pemain.
+i.	Use /1 : menggunakan objek yang ada dalam inventory pemain. Efek penggunaan objek berbeda-beda sesuai dengan jenis objeknya (medicine untuk 		 	 menambah health, weapon untuk menentukan senjata apa yang digunakan oleh pemain).
+j.	Attack /0 : menyerang musuh yang berada pada petak yang sama dengan pemain. Command gagal ketika tidak ada musuh yang berada pada petak yang 			    sama dengan pemain atau pemain tidak sedang menggunakan senjata.
+k.	Status /0 : menampilkan status pemain saat ini (health, armor, weapon, ammo) dan list barang yang ada di inventory saat ini.
+l.	Save /1 : menyimpan data permainan saat ini dengan nama file tertentu.
+m.	Load /1 : memuat data permainan dari file eksternal.
+
+Command tambahan:
+Unequip /1	: melepas armor atau weapon. Gagal jika tidak ada weapon atau armor yang diequip.
+
