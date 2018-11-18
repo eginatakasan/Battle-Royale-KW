@@ -20,7 +20,7 @@ item_at(medicine,medicine,3,2).
 
 
 /* Deklarasi fakta dinamik */
-player_at(3,3).
+player_at(2,2).
 timer(1).
 
 /* Deklarasi rules */
@@ -159,15 +159,15 @@ describe_around(_,_) :- write('you see nothing. '),!.
 
 
 is_deadzone(X,_) :- X =:= 15.
-is_deadzone(X,_) :- X =:= 1.
+is_deadzone(X,_) :- X =:= 0.
 is_deadzone(_,Y) :- Y =:= 15.
-is_deadzone(_,Y) :- Y =:= 1.
+is_deadzone(_,Y) :- Y =:= 0.
 
-drawmap(X,_) :- X<1.
-drawmap(X,Y) :- is_deadzone(X,Y), X >0, Y>1,!, write('X'),!, drawmap(X,Y-1),!.
-drawmap(X,Y) :- is_deadzone(X,Y), X >0, Y>0,!, write('X'),nl,!, drawmap(X-1,15),!.
-drawmap(X,Y) :- player_at(U,V),T is 16-U, X =:= T, S is 16-V, S =:= Y, X>0 , Y>0,!,  write('P'), drawmap(X,Y-1).
-drawmap(X,Y) :- X>1,Y>0,!, write('-'), drawmap(X,Y-1).
+drawmap(X,_) :- X<0.
+drawmap(X,Y) :- Z is 0-1, is_deadzone(X,Y), X >Z, Y>0,!, write('X'),!, drawmap(X,Y-1),!.
+drawmap(X,Y) :- Z is 0-1, is_deadzone(X,Y), X >Z, Y>Z,!, write('X'),nl,!, drawmap(X-1,15),!.
+drawmap(X,Y) :- player_at(U,V),T is 15-U, X =:= T, S is 15-V, S =:= Y, X>0 , Y>0,!,  write('P'), drawmap(X,Y-1).
+drawmap(X,Y) :- Z is 0-1,X>0,Y>Z,!, write('-'), drawmap(X,Y-1).
 
 write_legend :-
 	write('Legends:'),nl,
