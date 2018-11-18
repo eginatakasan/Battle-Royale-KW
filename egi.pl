@@ -7,12 +7,17 @@
 :- dynamic(is_deadzone/2).
 :- dynamic(timer/1).
 
-/* Deklarasi fakta statik */
-enemy_at(2,2).
-ammo_at(2,3).
-weapon_at(2,4).
-medicine_at(3,2).
-armor_at(3,4).
+/* Deklarasi fakta statik (sementara selagi belum ada fungsi spawn) */
+
+/* enemy_at(nomor enemy(enemy ke berapa), koordinat X, koordinat Y) */
+enemy_at(1,2,2).
+/* item_at(jenis item, nama item, koordinat X, koordinat Y) */
+/* yang termasuk item: weapon, medicine, armor, ammo */
+item_at(ammo,pistol_ammo,2,3).
+item_at(ammo,ak47_ammo,2,4).
+item_at(weapon,pistol,3,4).
+item_at(medicine,medicine,3,2).
+
 
 /* Deklarasi fakta dinamik */
 player_at(3,3).
@@ -20,6 +25,8 @@ timer(1).
 
 /* Deklarasi rules */
 map :- drawmap(15,15).
+
+quit :- end_game.
 
 n :- go(n).
 e :- go(e).
@@ -41,7 +48,16 @@ look :-
 	show_whats_around(X,C),nl,
 	show_whats_around(D,B),write(' '),
 	show_whats_around(D,Y),write(' '),
-	show_whats_around(D,C),nl.
+	show_whats_around(D,C),nl,nl,
+	write('To the northwest '),describe_around(A,B),
+	write('To the north '),describe_around(A,Y),
+	write('To the northeast '),describe_around(A,C),nl,
+	write('To the west '),describe_around(X,B),
+	write('Near you '),describe_around(X,Y),
+	write('to the east '),describe_around(X,C),nl,
+	write('to the southwest '),describe_around(D,B),
+	write('to the south '),describe_around(D,Y),
+	write('to the southeast '),describe_around(D,C),nl.
 
 go(n) :-
 	player_at(X,Y),
@@ -102,6 +118,7 @@ update :-
 	Y is X+1,
 	V is X / 7,!,
 	shrink_map(V),
+	write('Safe zone telah mengecil!'),
 	retract(timer(X)),
 	asserta(timer(Y)).
 
@@ -123,13 +140,23 @@ shrink_map(Z) :-
 
 
 show_whats_around(X,Y) :- is_deadzone(X,Y), write('X'),!.
-show_whats_around(X,Y) :- enemy_at(X,Y), write('E'),!.
-show_whats_around(X,Y) :- medicine_at(X,Y), write('M'),!.
-show_whats_around(X,Y) :- weapon_at(X,Y), write('W'),!.
-show_whats_around(X,Y) :- armor_at(X,Y), write('A'),!.
-show_whats_around(X,Y) :- ammo_at(X,Y), write('O'),!.
+show_whats_around(X,Y) :- enemy_at(_,X,Y), write('E'),!.
+show_whats_around(X,Y) :- item_at(medicine,_,X,Y), write('M'),!.
+show_whats_around(X,Y) :- item_at(weapon,_,X,Y), write('W'),!.
+show_whats_around(X,Y) :- item_at(armor,_,X,Y), write('A'),!.
+show_whats_around(X,Y) :- item_at(ammo,_,X,Y), write('O'),!.
 show_whats_around(X,Y) :- player_at(X,Y), write('P'),!.
 show_whats_around(_,_) :- write('-'),!.
+
+describe_around(X,Y) :- is_deadzone(X,Y), write(',is a deadzone. '),!.
+describe_around(X,Y) :- enemy_at(_,X,Y), write(',you see an enemy. '),!.
+describe_around(X,Y) :- item_at(medicine,_,X,Y), write(',you see a medicine. '),!.
+describe_around(X,Y) :- item_at(weapon,Name,X,Y), write(',you see a '),write(Name),write('.'),!.
+describe_around(X,Y) :- item_at(armor,Name,X,Y), write(',you see a '),write(Name),write('.'),!.
+describe_around(X,Y) :- item_at(ammo,Name,X,Y), write('you see some '),write(Name),write('.'),!.
+describe_around(_,_) :- write('you see nothing. '),!.
+
+
 
 is_deadzone(X,_) :- X =:= 15.
 is_deadzone(X,_) :- X =:= 1.
