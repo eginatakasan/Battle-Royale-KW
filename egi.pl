@@ -27,20 +27,28 @@ s :- go(s).
 w :- go(w).
 
 look :- 
+	write_legend,nl,
 	player_at(X,Y),
 	A is X-1, 
 	B is Y-1,
 	C is Y+1,
 	D is X+1,
-	show_whats_around(A,B),
-	show_whats_around(A,Y),
+	show_whats_around(A,B),write(' '),
+	show_whats_around(A,Y),write(' '),
 	show_whats_around(A,C),nl,
-	show_whats_around(X,B),
-	show_whats_around(X,Y),
+	show_whats_around(X,B),write(' '),
+	show_whats_around(X,Y),write(' '),
 	show_whats_around(X,C),nl,
-	show_whats_around(D,B),
-	show_whats_around(D,Y),
+	show_whats_around(D,B),write(' '),
+	show_whats_around(D,Y),write(' '),
 	show_whats_around(D,C),nl.
+
+go(n) :-
+	player_at(X,Y),
+	A is X-1,
+	is_deadzone(A,Y),!,
+	write('Anda memasuki dead zone!'),nl,
+	end_game.
 
 go(n) :- 
 	retract(player_at(X,Y)), 
@@ -48,21 +56,44 @@ go(n) :-
 	asserta(player_at(Z,Y)),
 	update.
 
+go(e) :-
+	player_at(X,Y),
+	A is Y+1,
+	is_deadzone(X,A),!,
+	write('Anda memasuki dead zone!'),nl,
+	end_game.
+
 go(e) :- 
 	retract(player_at(X,Y)), 
 	Z is Y+1, 
 	asserta(player_at(X,Z)),
 	update.
+
+go(s) :- 
+	player_at(X,Y),
+	A is X+1,
+	is_deadzone(A,Y),!,
+	write('Anda memasuki dead zone!'),nl,
+	end_game.	
+
 go(s) :- 
 	retract(player_at(X,Y)), 
 	Z is X+1, 
 	asserta(player_at(Z,Y)),
 	update.
+
+go(w) :- 
+	player_at(X,Y),
+	A is Y-1, 
+	is_deadzone(X,A),!,
+	write('Anda memasuki dead zone!'),nl,
+	end_game.
 go(w) :- 
 	retract(player_at(X,Y)), 
 	Z is Y-1, 
 	asserta(player_at(X,Z)),
 	update.
+
 
 update :-
 	timer(X),
@@ -81,6 +112,7 @@ update :-
 	Y is X+1,!,
 	retract(timer(X)),
 	asserta(timer(Y)).
+
 
 shrink_map(Z) :-
 	A is 15-Z,
@@ -110,4 +142,15 @@ drawmap(X,Y) :- is_deadzone(X,Y), X >0, Y>0,!, write('X'),nl,!, drawmap(X-1,15),
 drawmap(X,Y) :- player_at(U,V),T is 16-U, X =:= T, S is 16-V, S =:= Y, X>0 , Y>0,!,  write('P'), drawmap(X,Y-1).
 drawmap(X,Y) :- X>1,Y>0,!, write('-'), drawmap(X,Y-1).
 
-
+write_legend :-
+	write('Legends:'),nl,
+	write('W = weapon'),nl,
+	write('A = armor'),nl,
+	write('M = medicine'),nl,
+	write('O = ammo'),nl,
+	write('P = player'),nl,
+	write('E = enemy'),nl,
+	write('- = accessible'),nl,
+	write('X = inaccessible'),nl.
+	
+end_game :- write('***** Game Over *****'), halt.
