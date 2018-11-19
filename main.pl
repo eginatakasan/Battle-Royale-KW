@@ -234,6 +234,20 @@ update :-
 	V is X / 7,!,
 	shrink_map(V),
 	retract(timer(X)),
+	asserta(timer(Y)),
+	player_at(A,B),
+	is_deadzone(A,B),
+	write('Anda memasuki dead zone!'),nl,
+	end_game.
+
+update :-
+	timer(X),
+	Z is X mod 7,
+	Z =:= 0,
+	Y is X+1,
+	V is X / 7,!,
+	shrink_map(V),
+	retract(timer(X)),
 	asserta(timer(Y)).
 
 update :-
