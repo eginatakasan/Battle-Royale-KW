@@ -12,11 +12,17 @@
 :- dynamic(item_at/4).
 :- dynamic(health/1).
 :- dynamic(ammo/3).
+:- dynamic(enemy_at/3).
 
 /* Deklarasi fakta statik (sementara selagi belum ada fungsi spawn) */
 
 /* enemy_at(nomor enemy(enemy ke berapa), koordinat X, koordinat Y) */
-enemy_at(1,2,2).
+enemy_at(1,1,1).
+enemy_at(2,1,2).
+enemy_at(3,1,3).
+enemy_at(4,1,4).
+enemy_at(5,1,5).
+enemy_at(6,1,6).
 
 /*deklarasi item*/
 item(weapon,ak47).
@@ -59,7 +65,7 @@ item_at(medicine,medicine,3,2).
 
 
 /* Deklarasi fakta dinamik */
-player_at(3,3).
+player_at(0,0).
 timer(1).
 equipped_weapon(hand).
 health(70).
@@ -92,11 +98,34 @@ help :-
         write('quit.                    -- end game dan quit.'), nl,
         nl.
 
+/* Fungsi Spawn Everything */
+
+spawn_player_position:-
+	random(1,15,X),
+	random(1,15,Y),
+	player_at(M,N),
+	retract(player_at(M,N)),
+	asserta(player_at(X,Y)).
+
+spawn_enemy_position(A):-
+	random(1,15,X), write(X), nl,
+	random(1,15,Y), write(Y), nl,
+	enemy_at(A,M,N),
+	retract(enemy_at(A,M,N)),
+	asserta(enemy_at(A,X,Y)).
+
 /* Fungsi Start */
 start :-
 		write('Selamat datang di permainan PUBG ecek-ecek.'),
 		write('\nKetik help. untuk melihat command yang tersedia dan ketik map. untuk melihat kondisi kamu sekarang.\n'),
 		help,
+		spawn_player_position,
+		spawn_enemy_position(1),
+		spawn_enemy_position(2),
+		spawn_enemy_position(3),
+		spawn_enemy_position(4),
+		spawn_enemy_position(5),
+		spawn_enemy_position(6),
 		map.
 
 /*fungsi quit*/
@@ -212,9 +241,9 @@ update :-
 
 shrink_map(Z) :-
 	A is 15-Z,
-	asserta( (is_deadzone(X,_) :- X =:= Z+1) ),
+	asserta( (is_deadzone(X,_) :- X =:=Z) ),
 	asserta( (is_deadzone(X,_) :- X =:= A) ),
-	assertz( (is_deadzone(_,Y) :- Y =:= Z+1) ),
+	assertz( (is_deadzone(_,Y) :- Y =:= Z) ),
 	assertz( (is_deadzone(_,Y) :- Y =:= A) ).
 
 
