@@ -1,0 +1,21 @@
+Vivi
+take
+use
+attack
+drop 
+
+Egi
+map
+look
+s n e w
+unequip
+
+Jofi
+start - kurang random jumlah pemain dan random posisi dari pemain
+quit -
+help
+
+Winston
+save
+load
+status
