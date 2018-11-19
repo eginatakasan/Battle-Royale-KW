@@ -11,8 +11,8 @@ s n e w
 unequip
 
 Jofi
-start
-quit
+start - kurang random jumlah pemain dan random posisi dari pemain
+quit -
 help
 
 Winston

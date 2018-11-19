@@ -3,7 +3,7 @@
 /* retract artinya menghapus fakta atau rule dari database */
 /* asserta artinya menambah fakta atau rule dari database ditaruh di awal database*/
 /* assertz artinya menambah fakta atau rule dari database ditaruh di akhir database*/
-:- dynamic(player_at/2). 
+:- dynamic(player_at/2).
 :- dynamic(is_deadzone/2).
 :- dynamic(timer/1).
 :- dynamic(inventory/1).
@@ -71,8 +71,41 @@ enemy(1,100,20,ak47). /*enemy(NomorEnemy,HealthEnemy,ArmorEnemy,WeaponEnemy) */
 /*fungsi map*/
 map :- drawmap(15,15).
 
+/* help */
+help :-
+        nl,
+        write('Program dilaksanakan dengan bahasa Prolog'), nl,
+        write('List command yang tersedia :'), nl,
+        write('start.                   -- mulai permainan.'), nl,
+        write('n.  s.  e.  w.		    -- arah pergerakan'), nl,
+		write('map						-- menampilkan map dari game'), nl.
+        write('take(Object).            -- mengambil barang dari tanah ke inventory'), nl,
+        write('drop(Object).            -- menaruh barang dari inventory ke tanah'), nl,
+		write('use(Object)				-- memakai Object yang ada di di-inventory'), nl,
+		write('unequip(Object).			-- melepaskan equipment dan dimasukkan dalam inventory'), nl,
+		write('lihatinv.				-- melihat list inventory yang sedang dipegang.'), nl,
+        write('attack.                  -- menyerang musuh dengan equipment yang digunakan'), nl,
+        write('look.                    -- melihat daerah sekitar dengan ukuran 3x3.'), nl,
+        write('help.            		-- melihat list command yang tersedia'), nl,
+		write('save.					-- menyimpan game yang telah dilaksanakan'), nl,
+		write('load.					-- load game yang pernah disave.'), nl,
+        write('quit.                    -- end game dan quit.'), nl,
+        nl.
+
+/* Fungsi Start */
+start :-
+		write('Selamat datang di permainan PUBG ecek-ecek. Ketik help. untuk melihat command yang tersedia
+			dan ketik map. untuk melihat kondisi kamu sekarang.')
+        help,
+        map.
+
 /*fungsi quit*/
 quit :- end_game.
+end_game :- write('***** Game Over *****'), halt.
+
+/*fungsi save*/
+
+/*fungsi load*/
 
 /*fungsi gerak*/
 n :- go(n).
@@ -80,10 +113,10 @@ e :- go(e).
 s :- go(s).
 w :- go(w).
 
-look :- 
+look :-
 	write_legend,nl,
 	player_at(X,Y),
-	A is X-1, 
+	A is X-1,
 	B is Y-1,
 	C is Y+1,
 	D is X+1,
@@ -126,13 +159,13 @@ go(e) :-
 	write('Anda memasuki dead zone!'),nl,
 	end_game.
 
-go(e) :- 
-	retract(player_at(X,Y)), 
-	Z is Y+1, 
 	asserta(player_at(X,Z)),
+go(e) :-
+	retract(player_at(X,Y)),
+	Z is Y+1,
 	update.
 
-go(s) :- 
+go(s) :-
 	player_at(X,Y),
 	A is X+1,
 	is_deadzone(A,Y),!,
@@ -231,7 +264,7 @@ panjang([ ],0).
 panjang([_|T],X) :- panjang(T,Length), X is Length+1.
 
 /*fungsi take*/
-take(X) :- 
+take(X) :-
 	findall(A,inventory(A),B),
 	panjang(B,N),
 	N<5,
@@ -396,5 +429,3 @@ calculate_damage(_,_,Armor,Dmg) :-
 	X is Dmg - Armor,
 	X =< 0,nl, 
 	write('Armor musuh terlalu kuat! '),!.
-
-end_game :- write('***** Game Over *****'), halt.
