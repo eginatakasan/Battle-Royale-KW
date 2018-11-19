@@ -14,6 +14,7 @@
 :- dynamic(health/1).
 :- dynamic(ammo/3).
 :- dynamic(enemy_at/3).
+:- dynamic(enemy/4).
 
 /* Deklarasi fakta statik (sementara selagi belum ada fungsi spawn) */
 
@@ -26,6 +27,12 @@ enemy_at(5,1,5).
 enemy_at(6,1,6).
 
 /*deklarasi item*/
+enemy(1,100,20,ak47).
+enemy(2,100,5,pistol).
+enemy(3,100,20,ak47).
+enemy(4,100,5,hand).
+enemy(5,100,20,frying_pan).
+enemy(6,100,5,chicken).
 item(weapon,ak47).
 item(weapon,pistol).
 item(weapon,ayam).
@@ -51,6 +58,7 @@ weapon(hand,10,0).
 armor(helmet,10).
 armor(shoes,5).
 armor(vest,20).
+armor(none,0).
 medicine(medicine,20).
 ammo(pistol_ammo,pistol,0).
 ammo(ak47_ammo,ak47,0).
@@ -68,10 +76,15 @@ item_at(medicine,medicine,3,2).
 player_at(3,3).
 timer(6).
 equipped_weapon(hand,0).
-health(70).
+equipped_armor(none).
+health(100).
 enemy(1,100,20,ak47). /* enemy(NomorEnemy,HealthEnemy,ArmorEnemy,WeaponEnemy) */
 
 /* Deklarasi rules */
+inventory(pistol_ammo,3).
+inventory(pistol_ammo,3).
+inventory(pistol_ammo,3).
+inventory(pistol).
 
 /*fungsi map*/
 map :- drawmap(15,15).
@@ -426,17 +439,20 @@ use(X) :-
 	write('Tidak ada '), write(X), write(' dalam inventory.'), nl, !, fail.
 /*use ammo*/
 use(X) :-
-	ammo(X,Weapon,Bykammo),
+	ammo(X,Weapon,_),
 	inventory(X,_),
 	equipped_weapon(Weapon,Bykammo),
 	Bykammo =:= 6,
 	write('Slot ammo pada '), write(Weapon), write(' sudah full, tidak dapat melakukan reload!'), nl, !, fail.
-/* use(X) :- 
+use(X) :- 
+	ammo(X,Weapon,_),
 	inventory(X,N),
 	equipped_weapon(Weapon,Bykammo),
 	N + Bykammo < 7,
-	retract(Inventory(X,N)). */
-	
+	Z is N + Bykammo,
+	retract(inventory(X,N)),
+	retract(equipped_weapon(Weapon,Bykammo)),
+	asserta(equipped_weapon(Weapon,Z)), !.	
 use(X) :-
 	ammo(X,Weapon,N),	
 	\+inventory(X),
@@ -458,33 +474,57 @@ unequip(X) :- equipped_armor(X), retract(equipped_armor(X)), asserta(equipped_ar
 /*fungsi attack (belum lengkap)*/
 attack :- 
 	player_at(X,Y),
-	enemy_at(NomorEnemy,A,B),
-	X \=A, Y \=B, write('Tidak ada musuh dalam jarak yang dekat!'),!.
-
+	\+enemy_at(_,X,Y),
+	write('Tidak ada musuh dalam jarak yang dekat1!'), !, fail.
 attack :- 
 	player_at(X,Y),
-	enemy_at(NomorEnemy,X,Y),
-	equipped_weapon(Weapon),
+	enemy_at(_,X,Y),
+	equipped_weapon(Weapon,JlhAmmo),
 	weapon(Weapon,_,AmmoNeeded),
-	inventory(Ammo),
-	ammo(Ammo,Weapon,JlhAmmo),
-	JlhAmmo < AmmoNeeded,write('Ammo tidak cukup!'),!.
-
+	JlhAmmo < AmmoNeeded,
+	write('Ammo tidak cukup!'), !.
 attack :- 
-	player_at(X,Y), health(Health),
+	player_at(X,Y), 
+	health(Health),
 	enemy_at(NomorEnemy,X,Y),
 	enemy(NomorEnemy,HealthEnemy,ArmorEnemy,WeaponEnemy),
-	equipped_armor(Armor),
-	equipped_weapon(Weapon),
+	equipped_armor(NamaArmor),
+	armor(NamaArmor,Armor),
+	equipped_weapon(Weapon,JlhAmmo),
 	weapon(Weapon,Dmg,AmmoNeeded),
 	weapon(WeaponEnemy,DmgEnemy,_),
-	inventory(Ammo), ammo(Ammo,Weapon,JlhAmmo),
 	JlhAmmo >= AmmoNeeded,
-	write('Kamu menyerang musuh dengan '), write(Weapon), write('. '),
+	write('Kamu menyerang musuh dengan '), write(Weapon), write('. '), nl,
 	calculate_damage(NomorEnemy,HealthEnemy,ArmorEnemy,Dmg),
-	write('Health musuh tersisa '), 
+	write('Health musuh tersisa '),
 	enemy(NomorEnemy,B,_,_),
-	write(B),!.
+	write(B), nl,
+	write('Musuh menyerang kembali!'),nl,
+	calculate_health(Health,Armor,DmgEnemy),
+	health(NewHealth),
+	write('Health kamu tinggal '), write(NewHealth), nl, !.
+
+/*attackmusuh*/
+
+/*calculate_health*/
+calculate_health(Health,Armor,Dmg) :-
+	X is Dmg - Armor, X =< 0,!.
+
+calculate_health(Health,Armor,Dmg) :-
+	X is Dmg - Armor, X > 0,
+	Y is Health - X, Y =< 0,
+	Z is 0,
+	retract(health(Health)),
+	asserta(health(Z)),!,
+	write('Health kamu sekarang 0. Kamu mati diserang musuh.'),nl,
+	end_game.
+
+calculate_health(Health,Armor,Dmg) :-
+	X is Dmg - Armor, X > 0,
+	Y is Health - X,
+	retract(health(Health)),
+	asserta(health(Y)),!.
+
 
 /* fungsi calculate_damage: menghitung damage yang dilakukan kepada musuh */
 calculate_damage(NomorEnemy,Health,Armor,Dmg) :- 
@@ -493,7 +533,7 @@ calculate_damage(NomorEnemy,Health,Armor,Dmg) :-
 	Y is Health - X, 
 	Y =< 0,
 	retract(enemy(NomorEnemy,Health,Armor,WeaponEnemy)),
-	asserta(enemy(NomorEnemy,100,Armor,WeaponEnemy)),!.
+	asserta(enemy(NomorEnemy,0,Armor,WeaponEnemy)),!.
 
 calculate_damage(NomorEnemy,Health,Armor,Dmg) :-  
 	X is Dmg - Armor, 
