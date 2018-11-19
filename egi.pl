@@ -77,27 +77,27 @@ help :-
         write('Program dilaksanakan dengan bahasa Prolog'), nl,
         write('List command yang tersedia :'), nl,
         write('start.                   -- mulai permainan.'), nl,
-        write('n.  s.  e.  w.		    -- arah pergerakan'), nl,
-		write('map						-- menampilkan map dari game'), nl.
+		write('n. s. e. w.              -- arah pergerakan.'), nl,
+		write('map.                     -- menampilkan map dari game'), nl,
         write('take(Object).            -- mengambil barang dari tanah ke inventory'), nl,
         write('drop(Object).            -- menaruh barang dari inventory ke tanah'), nl,
-		write('use(Object)				-- memakai Object yang ada di di-inventory'), nl,
-		write('unequip(Object).			-- melepaskan equipment dan dimasukkan dalam inventory'), nl,
-		write('lihatinv.				-- melihat list inventory yang sedang dipegang.'), nl,
+        write('use(Object)              -- memakai Object yang ada di di-inventory'), nl,
+		write('unequip(Object).         -- melepaskan equipment dan dimasukkan dalam inventory'), nl,
+		write('lihatinv.                -- melihat list inventory yang sedang dipegang.'), nl,
         write('attack.                  -- menyerang musuh dengan equipment yang digunakan'), nl,
         write('look.                    -- melihat daerah sekitar dengan ukuran 3x3.'), nl,
-        write('help.            		-- melihat list command yang tersedia'), nl,
-		write('save.					-- menyimpan game yang telah dilaksanakan'), nl,
-		write('load.					-- load game yang pernah disave.'), nl,
+        write('help.                    -- melihat list command yang tersedia'), nl,
+		write('save.                    -- menyimpan game yang telah dilaksanakan'), nl,
+		write('load.                    -- load game yang pernah disave.'), nl,
         write('quit.                    -- end game dan quit.'), nl,
         nl.
 
 /* Fungsi Start */
 start :-
-		write('Selamat datang di permainan PUBG ecek-ecek. Ketik help. untuk melihat command yang tersedia
-			dan ketik map. untuk melihat kondisi kamu sekarang.')
-        help,
-        map.
+		write('Selamat datang di permainan PUBG ecek-ecek.'),
+		write('\nKetik help. untuk melihat command yang tersedia dan ketik map. untuk melihat kondisi kamu sekarang.\n'),
+		help,
+		map.
 
 /*fungsi quit*/
 quit :- end_game.
@@ -159,10 +159,10 @@ go(e) :-
 	write('Anda memasuki dead zone!'),nl,
 	end_game.
 
-	asserta(player_at(X,Z)),
 go(e) :-
 	retract(player_at(X,Y)),
 	Z is Y+1,
+	asserta(player_at(X,Z)),
 	update.
 
 go(s) :-
