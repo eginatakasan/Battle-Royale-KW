@@ -9,12 +9,13 @@
 :- dynamic(is_deadzone/2).
 :- dynamic(timer/1).
 :- dynamic(inventory/1).
-:- dynamic(inventory/2).
+:- dynamic(inventory/2).	/* khusus ammo */
 :- dynamic(equipped_weapon/2).
 :- dynamic(equipped_armor/1).
 :- dynamic(item_at/4).
+:- dynamic(item_at/5). /* khusus ammo */
 :- dynamic(health/1).
-:- dynamic(ammo/3).
+:- dynamic(ammo/2).
 :- dynamic(enemy_at/3).
 :- dynamic(enemy/4).
 
@@ -62,14 +63,14 @@ armor(shoes,5).
 armor(vest,20).
 armor(none,0).
 medicine(medicine,20).
-ammo(pistol_ammo,pistol,0).
-ammo(ak47_ammo,ak47,0).
-ammo(shotgun_ammo,shotgun,0).
+ammo(pistol_ammo,pistol).
+ammo(ak47_ammo,ak47).
+ammo(shotgun_ammo,shotgun).
 
 /* item_at(jenis item, nama item, koordinat X, koordinat Y) */
 /* yang termasuk item: weapon, medicine, armor, ammo */
-item_at(ammo,pistol_ammo,2,3).
-item_at(ammo,ak47_ammo,2,4).
+item_at(ammo,pistol_ammo,2,3,3).
+item_at(ammo,ak47_ammo,2,4,3).
 item_at(weapon,pistol,3,4).
 item_at(armor,shoes,3,5).
 item_at(medicine,medicine,3,2).
@@ -79,14 +80,14 @@ player_at(3,3).
 timer(6).
 health(100).
 equipped_weapon(pistol,0).
-equipped_armor(none).
+equipped_armor(vest).
 
 
 /* Deklarasi rules */
 inventory(pistol_ammo,3).
-inventory(pistol_ammo,3).
-inventory(pistol_ammo,3).
-inventory(pistol).
+inventory(ak47_ammo,2).
+inventory(ak47_ammo,3).
+inventory(ak47).
 inventory(medicine).
 
 
@@ -167,15 +168,16 @@ look :-
 	show_whats_around(D,B),write(' '),
 	show_whats_around(D,Y),write(' '),
 	show_whats_around(D,C),nl,nl,
-	write('To the northwest '),describe_around(A,B),
-	write('To the north '),describe_around(A,Y),
-	write('To the northeast '),describe_around(A,C),nl,
-	write('To the west '),describe_around(X,B),
-	write('Near you '),describe_around(X,Y),
-	write('to the east '),describe_around(X,C),nl,
-	write('to the southwest '),describe_around(D,B),
-	write('to the south '),describe_around(D,Y),
-	write('to the southeast '),describe_around(D,C),nl.
+	write('Kamu melihat sekelilingmu:'),nl,
+	write('Di dekat kamu, '),describe_around(X,Y),nl,
+	write('Di sebelah barat laut '),describe_around(A,B),nl,
+	write('Di sebelah utara '),describe_around(A,Y),nl,
+	write('Di timur laut, '),describe_around(A,C),nl,
+	write('Di sebelah barat '),describe_around(X,B),nl,
+	write('Di sebelah timur, '),describe_around(X,C),nl,
+	write('Di tenggara, '),describe_around(D,B),nl,
+	write('Di selatan, '),describe_around(D,Y),nl,
+	write('Di barat daya, '),describe_around(D,C),nl.
 
 go(n) :-
 	player_at(X,Y),
@@ -276,17 +278,17 @@ show_whats_around(X,Y) :- enemy_at(_,X,Y), write('E'),!.
 show_whats_around(X,Y) :- item_at(medicine,_,X,Y), write('M'),!.
 show_whats_around(X,Y) :- item_at(weapon,_,X,Y), write('W'),!.
 show_whats_around(X,Y) :- item_at(armor,_,X,Y), write('A'),!.
-show_whats_around(X,Y) :- item_at(ammo,_,X,Y), write('O'),!.
+show_whats_around(X,Y) :- item_at(ammo,_,X,Y,_), write('O'),!.
 show_whats_around(X,Y) :- player_at(X,Y), write('P'),!.
 show_whats_around(_,_) :- write('-'),!.
 
-describe_around(X,Y) :- is_deadzone(X,Y), write(',is a deadzone. '),!.
-describe_around(X,Y) :- enemy_at(_,X,Y), write(',you see an enemy. '),!.
-describe_around(X,Y) :- item_at(medicine,_,X,Y), write(',you see a medicine. '),!.
-describe_around(X,Y) :- item_at(weapon,Name,X,Y), write(',you see a '),write(Name),write('.'),!.
-describe_around(X,Y) :- item_at(armor,Name,X,Y), write(',you see a '),write(Name),write('.'),!.
-describe_around(X,Y) :- item_at(ammo,Name,X,Y), write('you see some '),write(Name),write('.'),!.
-describe_around(_,_) :- write('you see nothing. '),!.
+describe_around(X,Y) :- is_deadzone(X,Y), write(',adalah deadzone. '),!.
+describe_around(X,Y) :- enemy_at(_,X,Y), write(',kamu melihat musuh! '),!.
+describe_around(X,Y) :- item_at(medicine,_,X,Y), write(',ada medicine. '),!.
+describe_around(X,Y) :- item_at(weapon,Name,X,Y), write(',kamu melihat senjata '),write(Name),write(' di tanah.'),!.
+describe_around(X,Y) :- item_at(armor,Name,X,Y), write(',kamu melihat sebuah '),write(Name),write('.'),!.
+describe_around(X,Y) :- item_at(ammo,Name,X,Y,E), write('kamu melihat ada sebanyak '), write(E),write(' '),write(Name),write(' .'),!.
+describe_around(_,_) :- write('kelihatannya tidak ada apa-apa. '),!.
 
 
 
@@ -325,10 +327,10 @@ take(X) :-
 	P is M + N,
 	P < 5,
 	player_at(Y,Z),
- 	item_at(ammo,X,Y,Z),
+ 	item_at(ammo,X,Y,Z,E),
 	item(ammo,X),
-	asserta(inventory(X,3)),
-	retract(item_at(ammo,X,Y,Z)),
+	asserta(inventory(X,E)),
+	retract(item_at(ammo,X,Y,Z,E)),
 	write(X), write(' diambil'), !. 
 take(X) :- 
 	findall(A,inventory(A),B),
@@ -358,7 +360,7 @@ lihatinv :-
 	findall(B,inventory(B,_),Inve), 
 	konso(Inve,Inv,List), panjang(List,X),
 	X =:= 0,
-	write('Your inventory is empty'),!.
+	write('Inventory kosong'),!.
 
 lihatinv :- 
 	findall(A,inventory(A),Inv), 
@@ -380,14 +382,17 @@ drop(X) :-
 	write(X), write(' telah dijatuhkan.'), !.
 drop(X) :- 
 	inventory(X,Y),
-	retract(inventory(X,Y)), 
+	retract(inventory(X,Y)),
 	item(A,X),
-	player_at(Y,Z),
-	assertz(item_at(A,X,Y,Z)),
+	player_at(B,C),
+	assertz(item_at(A,X,B,C,Y)),
 	write(X), write(' telah dijatuhkan.'), !.
 drop(X) :- 
 	\+inventory(X), 
-	write(X), write(' tidak ada di inventory'), nl, !, fail.
+	write(X), write(' tidak ada di inventory'), nl, !.
+drop(X) :- 
+	\+inventory(X,_), 
+	write(X), write(' tidak ada di inventory'), nl, !.
 
 /*fungsi use*/
 use(X) :- 
@@ -415,7 +420,7 @@ use(X) :-
 use(X) :- 
 	weapon(X,_,_), 
 	inventory(X),
-	equipped_weapon(Y,Z), Z \= 0, ammo(Ammo,Y,_),
+	equipped_weapon(Y,Z), Z \= 0,
 	findall(A,inventory(A),B),
 	panjang(B,N),
 	findall(C,inventory(_,C),D),
@@ -430,17 +435,59 @@ use(X) :-
 use(X) :- 
 	weapon(X,_,_), 
 	inventory(X),
-	equipped_weapon(Y,Z), ammo(Ammo,Y,_), Z \=0,
+	equipped_weapon(Y,Z), ammo(Ammo,Y), Z > 0, Z < 4,
 	findall(A,inventory(A),B),
 	panjang(B,N),
 	findall(C,inventory(_,C),D),
 	panjang(D,M),
-	M+N < 4,  
+	M+N =< 4,  
 	retract(inventory(X)),
 	retract(equipped_weapon(Y,Z)),
 	asserta(equipped_weapon(X,0)),
-	asserta(inventory(Y)), asserta(inventory(Ammo)),
+	asserta(inventory(Y)), asserta(inventory(Ammo,Z)),
 	write('Weaponmu sekarang adalah '), write(X), nl, !.
+use(X) :- 
+	weapon(X,_,_), 
+	inventory(X),
+	equipped_weapon(Y,Z), ammo(Ammo,Y), Z > 3,
+	findall(A,inventory(A),B),
+	panjang(B,N),
+	findall(C,inventory(_,C),D),
+	panjang(D,M),
+	M+N =< 3,  
+	retract(inventory(X)),
+	retract(equipped_weapon(Y,Z)),
+	asserta(equipped_weapon(X,0)), Sisa is Z -3,
+	asserta(inventory(Y)), asserta(inventory(Ammo,3)), asserta(inventory(Ammo,Sisa)),!,
+	write('Weaponmu sekarang adalah '), write(X), nl, !.
+use(X) :- 
+	weapon(X,_,_), 
+	inventory(X),
+	equipped_weapon(Y,Z), ammo(Ammo,Y), Z > 3,
+	findall(A,inventory(A),B),
+	panjang(B,N),
+	findall(C,inventory(_,C),D),
+	panjang(D,M),
+	M+N =:= 4,  
+	retract(inventory(X)),
+	retract(equipped_weapon(Y,Z)),
+	asserta(equipped_weapon(X,0)), Sisa is Z -3,
+	asserta(inventory(Y)), asserta(inventory(Ammo,3)), asserta(inventory(Ammo,Sisa)),nl,write(Sisa),
+	write('Weaponmu sekarang adalah '), write(X), nl, drop(Ammo), !.
+use(X) :- 
+	weapon(X,_,_), 
+	inventory(X),
+	equipped_weapon(Y,Z), ammo(Ammo,Y), Z > 3,
+	findall(A,inventory(A),B),
+	panjang(B,N),
+	findall(C,inventory(_,C),D),
+	panjang(D,M),
+	M+N > 4,  
+	retract(inventory(X)),
+	retract(equipped_weapon(Y,Z)),
+	asserta(equipped_weapon(X,0)), Sisa is Z -3,
+	asserta(inventory(Y)), asserta(inventory(Ammo,3)), asserta(inventory(Ammo,Sisa)),
+	write('Weaponmu sekarang adalah '), write(X), nl, drop(Ammo),drop(Ammo), !.
 use(X) :- 
 	weapon(X,_,_),
 	\+inventory(X), 
@@ -448,7 +495,7 @@ use(X) :-
 use(X) :- 
 	armor(X,_),
 	inventory(X),
-	equipped_weapon(none),
+	equipped_armor(none),
 	retract(equipped_armor(none)), 
 	retract(inventory(X)),
 	asserta(equipped_armor(X)), 
@@ -516,42 +563,50 @@ use(X) :-
 	write('Tidak ada '), write(X), write(' dalam inventory.'), nl, !, fail.
 /*use ammo*/
 use(X) :-
-	ammo(X,Weapon,_),
+	ammo(X,Weapon),
 	inventory(X,_),
 	equipped_weapon(Weapon,Bykammo),
 	Bykammo =:= 6,
 	write('Slot ammo pada '), write(Weapon), write(' sudah full, tidak dapat melakukan reload!'), nl, !, fail.
 use(X) :- 
-	ammo(X,Weapon,_),
+	ammo(X,Weapon),
 	inventory(X,N),
 	equipped_weapon(Weapon,Bykammo),
-	N + Bykammo < 7,
-	Z is N + Bykammo,
+	Bykammo >= 0,Bykammo < 4, Z is N+Bykammo,
 	retract(inventory(X,N)),
 	retract(equipped_weapon(Weapon,Bykammo)),
 	asserta(equipped_weapon(Weapon,Z)), !.	
+use(X) :- 
+	ammo(X,Weapon),
+	inventory(X,N),
+	equipped_weapon(Weapon,Bykammo),
+	Bykammo >3,Bykammo < 6,
+	Z is 6 - Bykammo, Z >0, Y is 3 - Z,
+	retract(inventory(X,N)), asserta(inventory(X,Y)),
+	retract(equipped_weapon(Weapon,Bykammo)),
+	asserta(equipped_weapon(Weapon,Z)), !.	
 use(X) :-
-	ammo(X,_,_),	
-	\+inventory(X),
-	write('Tidak ada'), write(X), write(' dalam inventory'), nl , !, fail.
+	ammo(X,_),	
+	\+inventory(X,_),
+	write('Tidak ada '), write(X), write(' dalam inventory'), nl , !, fail.
 use(X) :-
-	ammo(X,Weapon,_),
-	inventory(X),
-	\+equipped_weapon(Weapon,_),
-	write(X), write(' bukan merupakan ammo dari '), write(Weapon), nl, !, fail.
+	ammo(X,Weapon),
+	inventory(X,_),
+	equipped_weapon(Y,_), Y \= Weapon,
+	write(X), write(' bukan merupakan ammo dari '), write(Y), nl, !, fail.
 
 
 /*fungsi unequip*/
 unequip(none) :- !.
 unequip(hand) :- !.
 unequip(X) :- equipped_weapon(Y,_), equipped_armor(Z), X \= Y, X \= Z, write('kamu sedang tidak menggunakan '),write(X),!.
-unequip(X) :- 
+unequip(X) :-
 	equipped_weapon(X,Z), Z =:=0, 
 	findall(A,inventory(A),B),
 	panjang(B,N),
 	findall(C,inventory(_,C),D),
 	panjang(D,M),
-	M+N >= 4, 
+	M+N =< 4, 
 	retract(equipped_weapon(X,Z)), 
 	asserta(equipped_weapon(hand,0)),  
 	asserta(inventory(X)),!.
@@ -567,7 +622,7 @@ unequip(X) :-
 	asserta(inventory(X)), write('Inventory penuh. '),
 	drop(X),!.
 unequip(X) :- 
-	equipped_weapon(X,Z), Z > 0, Z <4, ammo(Ammo,X,_), 
+	equipped_weapon(X,Z), Z > 0, Z <4, ammo(Ammo,X), 
 	findall(A,inventory(A),B),
 	panjang(B,N),
 	findall(C,inventory(_,C),D),
@@ -575,39 +630,9 @@ unequip(X) :-
 	M+N < 4, 
 	retract(equipped_weapon(X,Z)), 
 	asserta(equipped_weapon(hand,0)),  
-	asserta(inventory(X)), asserta(inventory(Ammo)),!.
+	asserta(inventory(X)), asserta(inventory(Ammo,Z)),!.
 unequip(X) :- 
-	equipped_weapon(X,Z), Z > 0, Z >3, ammo(Ammo,X,_), 
-	findall(A,inventory(A),B),
-	panjang(B,N),
-	findall(C,inventory(_,C),D),
-	panjang(D,M),
-	M+N < 3, 
-	retract(equipped_weapon(X,Z)), 
-	asserta(equipped_weapon(hand,0)),  
-	asserta(inventory(X)), asserta(inventory(Ammo)),asserta(inventory(Ammo)),!.
-unequip(X) :- 
-	equipped_weapon(X,Z), Z > 0, Z <4, ammo(Ammo,X,_), 
-	findall(A,inventory(A),B),
-	panjang(B,N),
-	findall(C,inventory(_,C),D),
-	panjang(D,M),
-	M+N =:= 3, 
-	retract(equipped_weapon(X,Z)), 
-	asserta(equipped_weapon(hand,0)),  
-	asserta(inventory(X)), asserta(ammo),write('Inventory penuh. '),drop(Ammo),!.
-unequip(X) :- 
-	equipped_weapon(X,Z), Z > 0, Z >3, ammo(Ammo,X,_), 
-	findall(A,inventory(A),B),
-	panjang(B,N),
-	findall(C,inventory(_,C),D),
-	panjang(D,M),
-	M+N =:= 3, 
-	retract(equipped_weapon(X,Z)), 
-	asserta(equipped_weapon(hand,0)),  
-	asserta(inventory(X)), asserta(inventory(ammo)),asserta(inventory(ammo)),write('Inventory penuh. '),drop(Ammo),!.
-unequip(X) :- 
-	equipped_weapon(X,Z), Z > 0, Z >3, ammo(Ammo,X,_), 
+	equipped_weapon(X,Z), Z > 0, Z <4, ammo(Ammo,X), 
 	findall(A,inventory(A),B),
 	panjang(B,N),
 	findall(C,inventory(_,C),D),
@@ -615,9 +640,10 @@ unequip(X) :-
 	M+N =:= 4, 
 	retract(equipped_weapon(X,Z)), 
 	asserta(equipped_weapon(hand,0)),  
-	asserta(inventory(X)), asserta(ammo),asserta(ammo),write('Inventory penuh. '),drop(Ammo),drop(Ammo),!.
+	asserta(inventory(X)), asserta(inventory(Ammo,Z)),write('Inventory penuh. '),
+	drop(Ammo),!.
 unequip(X) :- 
-	equipped_weapon(X,Z), Z > 0, Z <4, ammo(Ammo,X,_), 
+	equipped_weapon(X,Z), Z > 0, Z <4, ammo(Ammo,X), 
 	findall(A,inventory(A),B),
 	panjang(B,N),
 	findall(C,inventory(_,C),D),
@@ -625,18 +651,50 @@ unequip(X) :-
 	M+N >= 5,
 	retract(equipped_weapon(X,Z)), 
 	asserta(equipped_weapon(hand,0)),
-	asserta(inventory(X)), write('Inventory penuh. '),
+	asserta(inventory(X)), asserta(inventory(Ammo,Z)), write('Inventory penuh. '),
 	drop(X),drop(Ammo),!.
 unequip(X) :- 
-	equipped_weapon(X,Z), Z > 0, Z >3, ammo(Ammo,X,_), 
+	equipped_weapon(X,Z), Z >3, ammo(Ammo,X), 
+	findall(A,inventory(A),B),
+	panjang(B,N),
+	findall(C,inventory(_,C),D),
+	panjang(D,M),
+	M+N < 3, 
+	retract(equipped_weapon(X,Z)), 
+	asserta(equipped_weapon(hand,0)), Sisa is Z-3, 
+	asserta(inventory(X)), asserta(inventory(Ammo,3)),asserta(inventory(Ammo,Sisa)),!.
+unequip(X) :- 
+	equipped_weapon(X,Z), Z >3, ammo(Ammo,X), 
+	findall(A,inventory(A),B),
+	panjang(B,N),
+	findall(C,inventory(_,C),D),
+	panjang(D,M),
+	M+N =:= 3, 
+	retract(equipped_weapon(X,Z)), 
+	asserta(equipped_weapon(hand,0)), Sisa is Z-3,
+	asserta(inventory(X)), asserta(inventory(Ammo,3)),asserta(inventory(Ammo,Sisa)),write('Inventory penuh. '),
+	drop(Ammo),!.
+unequip(X) :- 
+	equipped_weapon(X,Z), Z >3, ammo(Ammo,X), 
+	findall(A,inventory(A),B),
+	panjang(B,N),
+	findall(C,inventory(_,C),D),
+	panjang(D,M),
+	M+N =:= 4, 
+	retract(equipped_weapon(X,Z)), 
+	asserta(equipped_weapon(hand,0)), Sisa is Z-3,
+	asserta(inventory(X)), asserta(inventory(Ammo,3)),asserta(inventory(Ammo,Sisa)),write('Inventory penuh. '),
+	drop(Ammo),drop(Ammo),!.
+unequip(X) :- 
+	equipped_weapon(X,Z), Z >3, ammo(Ammo,X), 
 	findall(A,inventory(A),B),
 	panjang(B,N),
 	findall(C,inventory(_,C),D),
 	panjang(D,M),
 	M+N >= 5,
 	retract(equipped_weapon(X,Z)), 
-	asserta(equipped_weapon(hand,0)),
-	asserta(inventory(X)), asserta(inventory(Ammo)), asserta(inventory(Ammo)), write('Inventory penuh. '),
+	asserta(equipped_weapon(hand,0)), Sisa is Z-3,
+	asserta(inventory(X)), asserta(inventory(Ammo,3)), asserta(inventory(Ammo,Sisa)), write('Inventory penuh. '),
 	drop(X),drop(Ammo),drop(Ammo),!.
 unequip(X) :- 
 	equipped_armor(X), 
@@ -685,8 +743,24 @@ attack :-
 	equipped_weapon(Weapon,JlhAmmo),
 	weapon(Weapon,Dmg,AmmoNeeded),
 	JlhAmmo >= AmmoNeeded,
-	write('Kamu menyerang musuh dengan '), write(Weapon), write('. '), nl,
+	C is JlhAmmo-AmmoNeeded, C =< 0, retract(equipped_weapon(Weapon,JlhAmmo)), asserta(equipped_weapon(Weapon,0)),
 	calculate_damage(NomorEnemy,HealthEnemy,ArmorEnemy,Dmg),
+	write('Kamu menyerang musuh dengan '), write(Weapon), write('. '), nl,
+	write('Health musuh tersisa '),
+	enemy(NomorEnemy,B,_,_),
+	write(B), nl,
+	counter_attack(NomorEnemy), !.
+
+attack :- 
+	player_at(X,Y), 
+	enemy_at(NomorEnemy,X,Y),
+	enemy(NomorEnemy,HealthEnemy,ArmorEnemy,_),
+	equipped_weapon(Weapon,JlhAmmo),
+	weapon(Weapon,Dmg,AmmoNeeded),
+	JlhAmmo >= AmmoNeeded,
+	C is JlhAmmo-AmmoNeeded, C > 0,retract(equipped_weapon(Weapon,JlhAmmo)), asserta(equipped_weapon(Weapon,C)), 
+	calculate_damage(NomorEnemy,HealthEnemy,ArmorEnemy,Dmg),
+	write('Kamu menyerang musuh dengan '), write(Weapon), write('. '), nl,
 	write('Health musuh tersisa '),
 	enemy(NomorEnemy,B,_,_),
 	write(B), nl,
@@ -707,15 +781,16 @@ counter_attack(NomorEnemy) :-
 	enemy(NomorEnemy,HealthEnemy,ArmorEnemy,WeaponEnemy),
 	HealthEnemy =:= 0,
 	write('Musuh telah mati! '),nl,
-	enemy_at(NomorEnemy,X,Y), write('1'),
+	enemy_at(NomorEnemy,X,Y),
 	retract(enemy_at(NomorEnemy,X,Y)),
 	retract(enemy(NomorEnemy,HealthEnemy,ArmorEnemy,WeaponEnemy)),
-	asserta(item_at(armor,ArmorEnemy,X,Y)), write('armor'),
-	asserta(item_at(weapon,WeaponEnemy,X,Y)), write('weapon'),
-	ammo(NamaAmmo,WeaponEnemy,_), write('a'),
-	asserta(item_at(ammo,NamaAmmo,X,Y)), write('b'),
+	asserta(item_at(armor,ArmorEnemy,X,Y)),
+	armor(NamaArmor,ArmorEnemy),
+	asserta(item_at(weapon,WeaponEnemy,X,Y)),
+	ammo(NamaAmmo,WeaponEnemy),
+	asserta(item_at(ammo,NamaAmmo,X,Y)),
 	write('Musuh telah menjatuhkan inventorynya:'),nl,
-	konso(WeaponEnemy,ArmorEnemy,List1), konso(List1,NamaAmmo,List2),
+	konso([WeaponEnemy],[NamaArmor],List1), konso(List1,[NamaAmmo],List2),
 	write(List2),nl,!.
 
 /*calculate_health*/
