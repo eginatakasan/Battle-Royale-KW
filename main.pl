@@ -45,6 +45,7 @@ item(weapon,hand).
 item(armor,helmet).
 item(armor,shoes).
 item(armor,vest).
+item(medicine,bandage).
 item(medicine,medicine).
 item(ammo,ak47_ammo).
 item(ammo,pistol_ammo).
@@ -62,18 +63,35 @@ armor(helmet,10).
 armor(shoes,5).
 armor(vest,20).
 armor(none,0).
-medicine(medicine,20).
+medicine(bandage,15).
+medicine(medicine,30).
 ammo(pistol_ammo,pistol).
 ammo(ak47_ammo,ak47).
 ammo(shotgun_ammo,shotgun).
 
 /* item_at(jenis item, nama item, koordinat X, koordinat Y) */
 /* yang termasuk item: weapon, medicine, armor, ammo */
+
+/* Deklarasi Posisi Weapon */
+item_at(weapon,pistol,3,4).
+item_at(weapon,frying_pan,3,3).
+item_at(weapon,chicken, 2,2).
+item_at(weapon,shotgun,1,1).
+item_at(weapon,ak47,1,2).
+
+/* Deklarasi Posisi Armor */
+item_at(armor,helmet,1,4).
+item_at(armor,shoes,1,3).
+item_at(armor,vest,1,5).
+
+/* Deklarasi Posisi Medicine */
+item_at(medicine,medicine,3,2).
+
+/* Deklarasi Posisi Ammo */
 item_at(ammo,pistol_ammo,2,3,3).
 item_at(ammo,ak47_ammo,2,4,3).
-item_at(weapon,pistol,3,4).
-item_at(armor,shoes,3,5).
-item_at(medicine,medicine,3,2).
+item_at(ammo,shotgun_ammo,2,4,3).
+
 
 /* Deklarasi fakta dinamik */
 player_at(3,3).
@@ -114,8 +132,7 @@ help :-
         write('help.                    -- melihat list command yang tersedia'), nl,
 		write('save.                    -- menyimpan game yang telah dilaksanakan'), nl,
 		write('load.                    -- load game yang pernah disave.'), nl,
-        write('quit.                    -- end game dan quit.'), nl,
-        nl.
+        write('quit.                    -- end game dan quit.'), nl.
 
 spawn_player_position:-
 	random(1,15,X),
@@ -125,11 +142,44 @@ spawn_player_position:-
 	asserta(player_at(X,Y)).
 
 spawn_enemy_position(A):-
-	random(1,15,X), write(X), nl,
-	random(1,15,Y), write(Y), nl,
+	random(1,15,X), nl,
+	random(1,15,Y), nl,
 	enemy_at(A,M,N),
 	retract(enemy_at(A,M,N)),
 	asserta(enemy_at(A,X,Y)).
+
+choose(List, Elt) :-
+        length(List, Length),
+        random(0, Length, Index),
+        nth0(Index, List, Elt).
+
+spawn_ammo_position:-
+	choose([pistol_ammo, ak47_ammo, shotgun_ammo],El),
+	random(1,15,X),
+	random(1,15,Y),
+	item_at(ammo,El,M,N,3),
+	asserta(item_at(ammo,El,X,Y,3)).
+
+spawn_weapon_position:-
+	choose([pistol,ak47,frying_pan,chicken,shotgun],El),
+	random(1,15,X),
+	random(1,15,Y),
+	item_at(weapon,El,M,N),
+	asserta(item_at(weapon,El,X,Y)).
+
+spawn_armor_position:-
+	choose([helmet,shoes,vest],El),
+	random(1,15,X),
+	random(1,15,Y),
+	retract(item_at(armor,El,M,N)),
+	asserta(item_at(armor,El,X,Y)).
+
+spawn_medicine_position:-
+	choose([bandage, medicine],El),
+	random(1,15,X),
+	random(1,15,Y),
+	item_at(medicine,El,M,N),
+	asserta(item_at(medicine,El,X,Y)).
 
 /* Fungsi Start */
 start :-
@@ -143,6 +193,34 @@ start :-
 		spawn_enemy_position(4),
 		spawn_enemy_position(5),
 		spawn_enemy_position(6),
+		spawn_weapon_position,
+		spawn_weapon_position,
+		spawn_weapon_position,
+		spawn_weapon_position,
+		spawn_weapon_position,
+		spawn_weapon_position,
+		spawn_armor_position,
+		spawn_armor_position,
+		spawn_armor_position,
+		spawn_armor_position,
+		spawn_medicine_position,
+		spawn_medicine_position,
+		spawn_medicine_position,
+		spawn_medicine_position,
+		spawn_medicine_position,
+		spawn_medicine_position,
+		spawn_medicine_position,
+		spawn_ammo_position,
+		spawn_ammo_position,
+		spawn_ammo_position,
+		spawn_ammo_position,
+		spawn_ammo_position,
+		spawn_ammo_position,
+		spawn_ammo_position,
+		spawn_ammo_position,
+		spawn_ammo_position,
+		spawn_ammo_position,
+		spawn_ammo_position,
 		map.
 
 
@@ -179,6 +257,17 @@ look :-
 	write('Di selatan, '),describe_around(D,Y),nl,
 	write('Di barat daya, '),describe_around(D,C),nl.
 
+enemy_move:-
+	choose([n,s,w,e], El),
+	retract(enemy_at(1,X,Y)),
+	write(X), nl, write(Y), nl, write(El),
+	El is 'n', write('hai'), fail;
+	El is 's', write('bla'), fail;
+	El is 'w', write('blas'), fail;
+	El is 'e', write('blaf'), fail;
+	write(Z), nl,
+	asserta(enemy_at(1,X,Y)).
+
 go(n) :-
 	player_at(X,Y),
 	A is X-1,
@@ -188,7 +277,8 @@ go(n) :-
 
 go(n) :- 
 	retract(player_at(X,Y)), 
-	Z is X-1, 
+	enemy_move,
+	Z is X-1,
 	asserta(player_at(Z,Y)),
 	update.
 
