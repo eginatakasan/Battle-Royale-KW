@@ -22,15 +22,15 @@
 /* Deklarasi fakta statik (sementara selagi belum ada fungsi spawn) */
 
 /* enemy_at(nomor enemy(enemy ke berapa), koordinat X, koordinat Y) */
-enemy_at(1,1,1).
-enemy_at(2,1,2).
-enemy_at(3,1,3).
-enemy_at(4,1,4).
-enemy_at(5,1,5).
-enemy_at(6,1,6).
+enemy_at(1,3,3).
+enemy_at(2,3,3).
+enemy_at(3,3,3).
+enemy_at(4,3,3).
+enemy_at(5,3,3).
+enemy_at(6,3,3).
 
 /*deklarasi item*/
-enemy(1,100,20,ak47).  /* enemy(NomorEnemy,HealthEnemy,ArmorEnemy,WeaponEnemy) */
+enemy(1,100,0,pistol).  /* enemy(NomorEnemy,HealthEnemy,ArmorEnemy,WeaponEnemy) */
 enemy(2,100,5,pistol).
 enemy(3,100,20,ak47).
 enemy(4,100,5,hand).
@@ -45,6 +45,7 @@ item(weapon,hand).
 item(armor,helmet).
 item(armor,shoes).
 item(armor,vest).
+item(medicine,bandage).
 item(medicine,medicine).
 item(ammo,ak47_ammo).
 item(ammo,pistol_ammo).
@@ -62,34 +63,25 @@ armor(helmet,10).
 armor(shoes,5).
 armor(vest,20).
 armor(none,0).
-medicine(medicine,20).
+medicine(bandage,15).
+medicine(medicine,30).
 ammo(pistol_ammo,pistol).
 ammo(ak47_ammo,ak47).
 ammo(shotgun_ammo,shotgun).
 
 /* item_at(jenis item, nama item, koordinat X, koordinat Y) */
 /* yang termasuk item: weapon, medicine, armor, ammo */
-item_at(ammo,pistol_ammo,2,3,3).
-item_at(ammo,ak47_ammo,2,4,3).
-item_at(weapon,pistol,3,4).
-item_at(armor,shoes,3,5).
-item_at(medicine,medicine,3,2).
 
 /* Deklarasi fakta dinamik */
 player_at(3,3).
-timer(6).
+timer(0).
 health(100).
-equipped_weapon(pistol,0).
-equipped_armor(vest).
+equipped_weapon(hand,0).
+equipped_armor(none).
 
 
 /* Deklarasi rules */
-inventory(pistol_ammo,3).
-inventory(ak47_ammo,2).
-inventory(ak47_ammo,3).
-inventory(ak47).
-inventory(medicine).
-
+item_at(medicine,bandage,3,3).
 
 /*fungsi map*/
 map :- drawmap(15,15).
@@ -169,15 +161,15 @@ look :-
 	show_whats_around(D,Y),write(' '),
 	show_whats_around(D,C),nl,nl,
 	write('Kamu melihat sekelilingmu:'),nl,
-	write('Di dekat kamu, '),describe_around(X,Y),nl,
-	write('Di sebelah barat laut '),describe_around(A,B),nl,
-	write('Di sebelah utara '),describe_around(A,Y),nl,
-	write('Di timur laut, '),describe_around(A,C),nl,
-	write('Di sebelah barat '),describe_around(X,B),nl,
-	write('Di sebelah timur, '),describe_around(X,C),nl,
-	write('Di tenggara, '),describe_around(D,B),nl,
-	write('Di selatan, '),describe_around(D,Y),nl,
-	write('Di barat daya, '),describe_around(D,C),nl.
+	write('Di dekat kamu '),listing_stuff(X,Y),nl,
+	write('Di sebelah barat laut '),listing_stuff(A,B),nl,
+	write('Di sebelah utara '),listing_stuff(A,Y),nl,
+	write('Di timur laut '),listing_stuff(A,C),nl,
+	write('Di sebelah barat '),listing_stuff(X,B),nl,
+	write('Di sebelah timur '),listing_stuff(X,C),nl,
+	write('Di tenggara '),listing_stuff(D,B),nl,
+	write('Di selatan '),listing_stuff(D,Y),nl,
+	write('Di barat daya '),listing_stuff(D,C),nl.
 
 go(n) :-
 	player_at(X,Y),
@@ -253,6 +245,7 @@ update :-
 	Y is X+1,
 	V is X / 7,!,
 	shrink_map(V),
+	check_win,
 	retract(timer(X)),
 	asserta(timer(Y)).
 
@@ -261,6 +254,7 @@ update :-
 	Z is X mod 7,
 	Z \= 0,
 	Y is X+1,!,
+	check_win,
 	retract(timer(X)),
 	asserta(timer(Y)).
 
@@ -282,15 +276,55 @@ show_whats_around(X,Y) :- item_at(ammo,_,X,Y,_), write('O'),!.
 show_whats_around(X,Y) :- player_at(X,Y), write('P'),!.
 show_whats_around(_,_) :- write('-'),!.
 
-describe_around(X,Y) :- is_deadzone(X,Y), write(',adalah deadzone. '),!.
-describe_around(X,Y) :- enemy_at(_,X,Y), write(',kamu melihat musuh! '),!.
-describe_around(X,Y) :- item_at(medicine,_,X,Y), write(',ada medicine. '),!.
-describe_around(X,Y) :- item_at(weapon,Name,X,Y), write(',kamu melihat senjata '),write(Name),write(' di tanah.'),!.
-describe_around(X,Y) :- item_at(armor,Name,X,Y), write(',kamu melihat sebuah '),write(Name),write('.'),!.
-describe_around(X,Y) :- item_at(ammo,Name,X,Y,E), write('kamu melihat ada sebanyak '), write(E),write(' '),write(Name),write(' .'),!.
-describe_around(_,_) :- write('kelihatannya tidak ada apa-apa. '),!.
+listing_stuff(X,Y) :- 
+	is_deadzone(X,Y),write(', adalah deadzone. '),!.
+listing_stuff(X,Y) :- 
+	is_there(enemy,X,Y,E), 
+	is_there(medicine,X,Y,M), 
+	is_there(weapon,X,Y,W),
+	is_there(armor,X,Y,A),
+	is_there(ammo,X,Y,O), 
+	E =:= 0, M =:= 0, W =:= 0, A =:= 0, O =:=0, write('tidak ada apa-apa.'),!.
+listing_stuff(X,Y) :- 
+	is_there(enemy,X,Y,E), 
+	is_there(medicine,X,Y,M), 
+	is_there(weapon,X,Y,W),
+	is_there(armor,X,Y,A),
+	is_there(ammo,X,Y,O),
+	describe(enemy,X,Y,E),is_there_more(M),
+	describe(medicine,X,Y,M), is_there_more(W),
+	describe(weapon,X,Y,W), is_there_more(A),
+	describe(armor,X,Y,A),is_there_more(O),
+	describe(ammo,X,Y,O),write('.'),!.
 
+is_there(enemy,X,Y,Result) :- enemy_at(_,X,Y), Result is 1,!.
+is_there(medicine,X,Y,Result) :- item_at(medicine,_,X,Y), Result is 1,!.
+is_there(weapon,X,Y,Result) :- item_at(weapon,_,X,Y), Result is 1,!.
+is_there(armor,X,Y,Result) :- item_at(armor,_,X,Y), Result is 1,!.
+is_there(ammo,X,Y,Result) :- item_at(ammo,_,X,Y,_), Result is 1,!.
+is_there(_,_,_,Result) :- Result is 0,!. 
 
+is_there_more(1):- write(', '),!.
+is_there_more(_).
+
+describe(enemy,_,_,1):- write('ada musuh'),!.
+describe(medicine,_,_,1):- write('ada medicine'),!.
+describe(weapon,X,Y,1):- 
+	findall(A,item_at(weapon,A,X,Y),List1), 
+	panjang(List1,B),
+	write_from_list(List1,B),!.
+describe(armor,X,Y,1):- 
+	findall(A,item_at(armor,A,X,Y),List1), 
+	panjang(List1,B),
+	write_from_list(List1,B),!.
+describe(ammo,X,Y,1):- 
+	findall(A,item_at(ammo,A,X,Y,_),List1), panjang(List1,B),
+	write_from_list(List1,B).
+describe(_,_,_,_).
+
+write_from_list([],_).
+write_from_list([H|T],N):-  Z is N-1, Z =:= 0, write('ada '),write(H), write_from_list(T,Z).
+write_from_list([H|T],N):-  Z is N-1, Z \=0 ,write('ada '),write(H),write(', '), write_from_list(T,Z).
 
 is_deadzone(X,_) :- X =:= 15.
 is_deadzone(X,_) :- X =:= 0.
@@ -326,8 +360,8 @@ take(X) :-
 	panjang(D,M),
 	P is M + N,
 	P < 5,
+	item_at(ammo,X,Y,Z,E),
 	player_at(Y,Z),
- 	item_at(ammo,X,Y,Z,E),
 	item(ammo,X),
 	asserta(inventory(X,E)),
 	retract(item_at(ammo,X,Y,Z,E)),
@@ -407,11 +441,6 @@ use(X) :-
 	weapon(X,_,_), 
 	inventory(X),
 	equipped_weapon(Y,Z), Z =:= 0,
-	findall(A,inventory(A),B),
-	panjang(B,N),
-	findall(C,inventory(_,C),D),
-	panjang(D,M),
-	M+N > 4,  
 	retract(equipped_weapon(Y,Z)),
 	retract(inventory(X)),
 	asserta(equipped_weapon(X,0)),
@@ -489,10 +518,6 @@ use(X) :-
 	asserta(inventory(Y)), asserta(inventory(Ammo,3)), asserta(inventory(Ammo,Sisa)),
 	write('Weaponmu sekarang adalah '), write(X), nl, drop(Ammo),drop(Ammo), !.
 use(X) :- 
-	weapon(X,_,_),
-	\+inventory(X), 
-	write('Tidak ada '), write(X), write(' dalam inventory.'), nl, !, fail.
-use(X) :- 
 	armor(X,_),
 	inventory(X),
 	equipped_armor(none),
@@ -528,39 +553,30 @@ use(X) :-
 	asserta(equipped_armor(X)),
 	asserta(inventory(Y)), write('Inventory penuh. '),drop(Y),
 	write('Armormu sekarang adalah '), write(X), nl, !.
-use(X) :- 
-	armor(X,_), 
-	\+inventory(X), 
-	write('Tidak ada '), write(X), write(' dalam inventory.'), nl, !, fail.
 use(X) :-
 	medicine(X,_),
-	inventory(X),
 	health(A),
-	A=100,
+	A=:=100,
 	write('health masih full, tidak bisa ditambah'), !, fail.
 use(X) :-
-	medicine(X,_),
+	medicine(X,Y),
 	inventory(X),
 	health(A),
-	A+30>=100,
+	A+Y>=100,
 	retract(inventory(X)),
 	retract(health(A)),
 	asserta(health(100)),
 	write('health berhasil ditambah, health anda sekarang adalah 100'),!.
 use(X) :-
-	medicine(X,_),
+	medicine(X,Y),
 	inventory(X),
 	health(A),
-	A+30<100,
-	Z is A + 30,
+	A+Y<100,
+	Z is A + Y,
 	retract(inventory(X)),
 	retract(health(A)),
 	asserta(health(Z)),
 	write('health berhasil ditambah, health anda sekarang adalah '), write(Z),!.
-use(X) :-
-	medicine(X,_),
-	\+inventory(X),
-	write('Tidak ada '), write(X), write(' dalam inventory.'), nl, !, fail.
 /*use ammo*/
 use(X) :-
 	ammo(X,Weapon),
@@ -594,12 +610,15 @@ use(X) :-
 	inventory(X,_),
 	equipped_weapon(Y,_), Y \= Weapon,
 	write(X), write(' bukan merupakan ammo dari '), write(Y), nl, !, fail.
+use(X) :-
+	\+inventory(X),
+	write('Tidak ada '), write(X), write(' dalam inventory.'), nl, !, fail.
 
 
 /*fungsi unequip*/
-unequip(none) :- !.
-unequip(hand) :- !.
-unequip(X) :- equipped_weapon(Y,_), equipped_armor(Z), X \= Y, X \= Z, write('kamu sedang tidak menggunakan '),write(X),!.
+unequip(none) :- !,fail.
+unequip(hand) :- !,fail.
+unequip(X) :- equipped_weapon(Y,_), equipped_armor(Z), X \= Y, X \= Z, write('kamu sedang tidak menggunakan '),write(X),!,fail.
 unequip(X) :-
 	equipped_weapon(X,Z), Z =:=0, 
 	findall(A,inventory(A),B),
@@ -734,7 +753,7 @@ attack :-
 	health(Health), equipped_armor(NamaArmor), armor(NamaArmor,Armor), weapon(WeaponEnemy,DmgEnemy,_),
 	calculate_health(Health,Armor,DmgEnemy),
 	health(NewHealth),
-	write('Health kamu tinggal '), write(NewHealth), nl, !.
+	write('Health kamu tinggal '), write(NewHealth), nl,!.
 
 attack :- 
 	player_at(X,Y), 
@@ -749,7 +768,7 @@ attack :-
 	write('Health musuh tersisa '),
 	enemy(NomorEnemy,B,_,_),
 	write(B), nl,
-	counter_attack(NomorEnemy), !.
+	counter_attack(NomorEnemy),!.
 
 attack :- 
 	player_at(X,Y), 
@@ -764,7 +783,7 @@ attack :-
 	write('Health musuh tersisa '),
 	enemy(NomorEnemy,B,_,_),
 	write(B), nl,
-	counter_attack(NomorEnemy), !.
+	counter_attack(NomorEnemy),!.
 
 /* counter_attack (BELUM LENGKAP): musuh melakukan attack pada player jika musuh diserang, atau musuh mati setelah diserang */
 counter_attack(NomorEnemy) :-
@@ -776,8 +795,56 @@ counter_attack(NomorEnemy) :-
 	calculate_health(Health,Armor,DmgEnemy),
 	health(NewHealth),
 	write('Health kamu tinggal '), write(NewHealth), nl,!.
-
-counter_attack(NomorEnemy) :-
+counter_attack(NomorEnemy) :- /* musuh tidak memakai senjata atau armor */ 
+	enemy(NomorEnemy,HealthEnemy,0,hand),
+	HealthEnemy =:= 0,
+	write('Musuh telah mati! '),nl,
+	enemy_at(NomorEnemy,X,Y),
+	retract(enemy_at(NomorEnemy,X,Y)),
+	retract(enemy(NomorEnemy,HealthEnemy,0,hand)),
+	write('Namun musuh tidak memiliki apa-apa.'),nl,!.
+counter_attack(NomorEnemy) :- /* musuh tidak memakai armor namun pakai weapon berammo*/ 
+	enemy(NomorEnemy,HealthEnemy,0,WeaponEnemy),
+	HealthEnemy =:= 0,
+	WeaponEnemy \= hand,
+	weapon(WeaponEnemy,_,JlhAmmo), JlhAmmo \= 0,
+	ammo(NamaAmmo,WeaponEnemy),
+	write('Musuh telah mati! '),nl,
+	enemy_at(NomorEnemy,X,Y),
+	retract(enemy_at(NomorEnemy,X,Y)),
+	retract(enemy(NomorEnemy,HealthEnemy,0,WeaponEnemy)),
+	asserta(item_at(weapon,WeaponEnemy,X,Y)),
+	asserta(item_at(ammo,NamaAmmo,X,Y,3)),
+	write('Musuh telah menjatuhkan inventorynya:'),nl,
+	konso([WeaponEnemy],[NamaAmmo],List1),
+	write(List1),nl,check_win,!.
+counter_attack(NomorEnemy) :- /* musuh tidak memakai senjata */ 
+	enemy(NomorEnemy,HealthEnemy,ArmorEnemy,hand),
+	HealthEnemy =:= 0,
+	ArmorEnemy \= 0,
+	armor(NamaArmor,ArmorEnemy),
+	write('Musuh telah mati! '),nl,
+	enemy_at(NomorEnemy,X,Y),
+	retract(enemy_at(NomorEnemy,X,Y)),
+	retract(enemy(NomorEnemy,HealthEnemy,ArmorEnemy,hand)),
+	write('Musuh telah menjatuhkan inventorynya:'),nl,
+	konso([NamaArmor],[],List1),
+	write(List1),nl,check_win,!.
+counter_attack(NomorEnemy) :- /* musuh memakai senjata yang tidak pakai ammo */ 
+	enemy(NomorEnemy,HealthEnemy,ArmorEnemy,WeaponEnemy),
+	HealthEnemy =:= 0,
+	write('Musuh telah mati! '),nl,
+	enemy_at(NomorEnemy,X,Y),
+	retract(enemy_at(NomorEnemy,X,Y)),
+	retract(enemy(NomorEnemy,HealthEnemy,ArmorEnemy,WeaponEnemy)),
+	weapon(WeaponEnemy,_,0),
+	asserta(item_at(armor,ArmorEnemy,X,Y)),
+	armor(NamaArmor,ArmorEnemy),
+	asserta(item_at(weapon,WeaponEnemy,X,Y)),
+	write('Musuh telah menjatuhkan inventorynya:'),nl,
+	konso([WeaponEnemy],[NamaArmor],List1),
+	write(List1),nl,check_win,!.
+counter_attack(NomorEnemy) :- /* atribut musuh lengkap */
 	enemy(NomorEnemy,HealthEnemy,ArmorEnemy,WeaponEnemy),
 	HealthEnemy =:= 0,
 	write('Musuh telah mati! '),nl,
@@ -788,10 +855,10 @@ counter_attack(NomorEnemy) :-
 	armor(NamaArmor,ArmorEnemy),
 	asserta(item_at(weapon,WeaponEnemy,X,Y)),
 	ammo(NamaAmmo,WeaponEnemy),
-	asserta(item_at(ammo,NamaAmmo,X,Y)),
+	asserta(item_at(ammo,NamaAmmo,X,Y,3)),
 	write('Musuh telah menjatuhkan inventorynya:'),nl,
 	konso([WeaponEnemy],[NamaArmor],List1), konso(List1,[NamaAmmo],List2),
-	write(List2),nl,!.
+	write(List2),nl,check_win,!.
 
 /*calculate_health*/
 
@@ -835,5 +902,13 @@ calculate_damage(_,_,Armor,Dmg) :-
 	X is Dmg - Armor,
 	X =< 0,nl, 
 	write('Armor musuh terlalu kuat! '),!.
+
+check_win :-
+	findall(A,enemy_at(A,_,_),List1),
+	panjang(List1,B), B \= 0,!.
+check_win :- 
+	findall(A,enemy_at(A,_,_),List1),
+	panjang(List1,B), B =:= 0,
+	write('***** Kamu Menang *****'),halt.
 
 end_game :- write('***** Game Over *****'), halt.
