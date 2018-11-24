@@ -12,16 +12,16 @@ item_at(type1,name1,x1,y1).
 item_at(typeammo,nameammo,x,y,nb).
 item_at(typeammo1,nameammo1,x1,y1,nb1).*/
 
-save(F) :-  open('save_file.txt',write,Stream),
-            health(X),write(Stream,health(X)),write(Stream,'.'), nl(Stream),
-            armor(A,Y),write(Stream,armor(A,Y)),write(Stream,'.'),nl(Stream),
-            weapon(Z,D,E),write(Stream,weapon(Z,D,E)),write(Stream,'.'),nl(Stream),
-            ammo(B,C,S),write(Stream,ammo(B,C,S)),write(Stream,'.'),nl(Stream),  /*Asumsi ammo terdiri dari 3 param */
-            inventory([H|T]),write(Stream,inventory([H|T])),write(Stream,'.'),nl(Stream),
-            forall(enemy_at(G,PosEX,PosEY),(write(Stream,enemy_at(G,PosEX,PosEY)),write(Stream,'.'),nl(Stream))),
+save :-     open('save_file.txt',write,Stream),
             player_at(PosPX,PosPY),write(Stream,player_at(PosPX,PosPY)),write(Stream,'.'),nl(Stream),
+            timer(I),write(Stream,timer(I)),write(Stream,'.'),nl(Stream),
+            health(X),write(Stream,health(X)),write(Stream,'.'), nl(Stream),
+            equipped_weapon(D,E),write(Stream,equipped_weapon(D,E)),write(Stream,'.'),nl(Stream),
+            equipped_armor(A),write(Stream,armor(A)),write(Stream,'.'),nl(Stream),
+            forall(inventory(H),(write(Stream,inventory(H)),write(Stream,'.'),nl(Stream))),
+            forall(enemy_at(G,PosEX,PosEY),(write(Stream,enemy_at(G,PosEX,PosEY)),write(Stream,'.'),nl(Stream))),
             forall(item_at(Type,Name,PosIX,PosIY),(write(Stream,item_at(Type,Name,PosIX,PosIY)),write(Stream,'.'),nl(Stream))),
             forall(item_at(TypeAmmo,NameAmmo,PosIAX,PosIAY,Nb),(write(Stream,item_at(TypeAmmo,NameAmmo,PosIAX,PosIAY,Nb)),write(Stream,'.'),nl(Stream))),
             close(Stream).
 
-load(X) :- consult('save_file.txt'),['save_file'].
+load :- consult('save_file.txt').
