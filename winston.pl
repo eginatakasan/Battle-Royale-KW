@@ -1,5 +1,18 @@
-save(X) :- open('save_file.pl',write,Stream),health(X), armor(_,Y), equipped_weapon(Z), ammo(_,_,S),inventory(T),write(health(X)),write(Stream,armor(_,Y)), write(Stream,equipped_weapon(Z)),write(Stream,ammo(_,_,S)),write(Stream,inventory(T)).
+/* Data Test*/
+health(100).
+weapon(ak47,50,2).
+armor(vest,20).
+ammo(ak47_ammo,ak47,10).
+medicine(bandage,15).
+equipped_weapon(ak47).
+inventory(['bandage','ak47_ammo','helmet']).
+
+save(F) :-  open('save_file.pl',write,Stream),
+            health(X),write(Stream,health(X)),write(Stream,'.'), nl(Stream),
+            armor(A,Y),write(Stream,armor(A,Y)),write(Stream,'.'),nl(Stream),
+            weapon(Z,D,E),write(Stream,weapon(Z,D,E)),write(Stream,'.'),nl(Stream),
+            ammo(B,C,S),write(Stream,ammo(B,C,S)),write(Stream,'.'),nl(Stream),  /*Asumsi ammo terdiri dari 3 param */
+            inventory([H|T]),write(Stream,inventory([H|T])),write(Stream,'.'),nl(Stream),
+            close(Stream).
 
 load(X) :- consult('save_file.pl'),['save_file'].
-
-status :- health(X), equipped_armor(NamaArmor),armor(NamaArmor,Y), equipped_weapon(Z,S), write('Health: '),write(X),nl, write('Armor: '), write(Y),nl,write('Weapon: '),write(Z),nl,write('Ammo: '),write(S),nl,write('Inventory:'),nl,lihatinv,nl.
