@@ -1,5 +1,12 @@
 health(100).
 armor(vest,20).
 weapon(ak47,50,2).
-ammo(ak47_ammo,ak47,10).
-inventory([bandage,ak47_ammo,helmet]).
+ammo(none,none,none).
+inventory([medicine,pistol,pistol_ammo]).
+enemy_at(1,10,2).
+enemy_at(2,5,4).
+player_at(5,5).
+item_at(type,name,x,y).
+item_at(type1,name1,x1,y1).
+item_at(typeammo,nameammo,x,y,nb).
+item_at(typeammo1,nameammo1,x1,y1,nb1).
