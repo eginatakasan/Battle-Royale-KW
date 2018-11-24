@@ -57,7 +57,7 @@ weapon(ak47,50,2).
 weapon(pistol,35,1).
 weapon(chicken,25,0).
 weapon(frying_pan,30,0).
-weapon(shotgun,60,3).
+weapon(shotgun,60,2).
 weapon(hand,10,0).
 armor(helmet,10).
 armor(shoes,5).
@@ -72,37 +72,17 @@ ammo(shotgun_ammo,shotgun).
 /* item_at(jenis item, nama item, koordinat X, koordinat Y) */
 /* yang termasuk item: weapon, medicine, armor, ammo */
 
-/* Deklarasi Posisi Weapon */
-item_at(weapon,pistol,3,4).
-item_at(weapon,frying_pan,3,3).
-item_at(weapon,chicken, 2,2).
-item_at(weapon,shotgun,1,1).
-item_at(weapon,ak47,1,2).
-
-/* Deklarasi Posisi Armor */
-item_at(armor,helmet,1,4).
-item_at(armor,shoes,1,3).
-item_at(armor,vest,1,5).
-
-/* Deklarasi Posisi Medicine */
-item_at(medicine,medicine,3,2).
-
-/* Deklarasi Posisi Ammo */
-item_at(ammo,pistol_ammo,2,3,3).
-item_at(ammo,ak47_ammo,2,4,3).
-item_at(ammo,shotgun_ammo,2,4,3).
 
 
 /* Deklarasi fakta dinamik */
 player_at(3,3).
-timer(0).
+timer(1).
 health(100).
 equipped_weapon(hand,0).
 equipped_armor(none).
 
 
 /* Deklarasi rules */
-item_at(medicine,bandage,3,3).
 
 /*fungsi map*/
 map :- drawmap(15,15).
@@ -137,8 +117,8 @@ spawn_player_position:-
 	asserta(player_at(X,Y)).
 
 spawn_enemy_position(A):-
-	random(1,15,X), nl,
-	random(1,15,Y), nl,
+	random(2,14,X), nl,
+	random(2,14,Y), nl,
 	enemy_at(A,M,N),
 	retract(enemy_at(A,M,N)),
 	asserta(enemy_at(A,X,Y)).
@@ -148,33 +128,37 @@ choose(List, Elt) :-
         random(0, Length, Index),
         nth0(Index, List, Elt).
 
-spawn_ammo_position:-
+spawn_ammo_position(0).
+spawn_ammo_position(A):-
 	choose([pistol_ammo, ak47_ammo, shotgun_ammo],El),
 	random(1,15,X),
 	random(1,15,Y),
-	item_at(ammo,El,M,N,3),
-	asserta(item_at(ammo,El,X,Y,3)).
+	asserta(item_at(ammo,El,X,Y,3)),
+	Z is A-1, spawn_ammo_position(Z).
 
-spawn_weapon_position:-
+spawn_weapon_position(0).
+spawn_weapon_position(A):-
 	choose([pistol,ak47,frying_pan,chicken,shotgun],El),
 	random(1,15,X),
 	random(1,15,Y),
-	item_at(weapon,El,M,N),
-	asserta(item_at(weapon,El,X,Y)).
+	asserta(item_at(weapon,El,X,Y)),
+	Z is A-1, spawn_weapon_position(Z).
 
-spawn_armor_position:-
+spawn_armor_position(0):-!.
+spawn_armor_position(A):-
 	choose([helmet,shoes,vest],El),
 	random(1,15,X),
 	random(1,15,Y),
-	retract(item_at(armor,El,M,N)),
-	asserta(item_at(armor,El,X,Y)).
+	asserta(item_at(armor,El,X,Y)),
+	Z is A-1, spawn_armor_position(Z).
 
-spawn_medicine_position:-
+spawn_medicine_position(0):-!.
+spawn_medicine_position(A):-
 	choose([bandage, medicine],El),
 	random(1,15,X),
 	random(1,15,Y),
-	item_at(medicine,El,M,N),
-	asserta(item_at(medicine,El,X,Y)).
+	asserta(item_at(medicine,El,X,Y)),
+	Z is A-1, spawn_medicine_position(Z).
 
 /* Fungsi Start */
 start :-
@@ -188,35 +172,11 @@ start :-
 		spawn_enemy_position(4),
 		spawn_enemy_position(5),
 		spawn_enemy_position(6),
-		spawn_weapon_position,
-		spawn_weapon_position,
-		spawn_weapon_position,
-		spawn_weapon_position,
-		spawn_weapon_position,
-		spawn_weapon_position,
-		spawn_armor_position,
-		spawn_armor_position,
-		spawn_armor_position,
-		spawn_armor_position,
-		spawn_medicine_position,
-		spawn_medicine_position,
-		spawn_medicine_position,
-		spawn_medicine_position,
-		spawn_medicine_position,
-		spawn_medicine_position,
-		spawn_medicine_position,
-		spawn_ammo_position,
-		spawn_ammo_position,
-		spawn_ammo_position,
-		spawn_ammo_position,
-		spawn_ammo_position,
-		spawn_ammo_position,
-		spawn_ammo_position,
-		spawn_ammo_position,
-		spawn_ammo_position,
-		spawn_ammo_position,
-		spawn_ammo_position,
-		map.
+		spawn_weapon_position(10),
+		spawn_armor_position(8),
+		spawn_medicine_position(20),
+		spawn_ammo_position(30),
+		map, !.
 
 
 /*fungsi gerak*/
@@ -242,26 +202,103 @@ look :-
 	show_whats_around(D,Y),write(' '),
 	show_whats_around(D,C),nl,nl,
 	write('Kamu melihat sekelilingmu:'),nl,
-	write('Di dekat kamu '),listing_stuff(X,Y),nl,
-	write('Di sebelah barat laut '),listing_stuff(A,B),nl,
-	write('Di sebelah utara '),listing_stuff(A,Y),nl,
-	write('Di timur laut '),listing_stuff(A,C),nl,
-	write('Di sebelah barat '),listing_stuff(X,B),nl,
-	write('Di sebelah timur '),listing_stuff(X,C),nl,
-	write('Di tenggara '),listing_stuff(D,B),nl,
-	write('Di selatan '),listing_stuff(D,Y),nl,
-	write('Di barat daya '),listing_stuff(D,C),nl.
+	write('Di NorthWest '),listing_stuff(A,B),nl,
+	write('Di North '),listing_stuff(A,Y),nl,
+	write('Di NorthEast '),listing_stuff(A,C),nl,
+	write('Di West '),listing_stuff(X,B),nl,
+	write('Di sekitar kamu '),listing_stuff(X,Y),nl,
+	write('Di East '),listing_stuff(X,C),nl,
+	write('Di SouthEast '),listing_stuff(D,B),nl,
+	write('Di South '),listing_stuff(D,Y),nl,
+	write('Di SouthWest '),listing_stuff(D,C),nl.
 
-enemy_move:-
+
+/*randoming enemy move*/
+random_movement(0) :- !.
+random_movement(X):-
 	choose([n,s,w,e], El),
-	retract(enemy_at(1,X,Y)),
-	write(X), nl, write(Y), nl, write(El),
-	El is 'n', write('hai'), fail;
-	El is 's', write('bla'), fail;
-	El is 'w', write('blas'), fail;
-	El is 'e', write('blaf'), fail;
-	write(Z), nl,
-	asserta(enemy_at(1,X,Y)).
+	move_enemy(El,X),
+	Z is X-1,
+	random_movement(Z).
+
+move_enemy(n,N) :-
+	enemy_at(N,X,Y),
+	player_not_around_enemy(N),
+	Z is X-1,
+	\+is_deadzone(Z,Y),
+	retract(enemy_at(N,X,Y)),
+	asserta(enemy_at(N,Z,Y)),!.
+move_enemy(n,N) :-
+	enemy_at(N,X,Y),
+	player_not_around_enemy(N),
+	Z is X-1,
+	is_deadzone(Z,Y),
+	Turn is X+1,
+	retract(enemy_at(N,X,Y)),
+	asserta(enemy_at(N,X,Turn)),!.
+move_enemy(w,N) :-
+	enemy_at(N,X,Y),
+	player_not_around_enemy(N),
+	Z is Y+1,
+	\+is_deadzone(X,Z),
+	retract(enemy_at(N,X,Y)),
+	asserta(enemy_at(N,X,Z)),!.
+move_enemy(w,N) :-
+	enemy_at(N,X,Y),
+	player_not_around_enemy(N),
+	Z is Y+1,
+	is_deadzone(Z,Y),
+	Turn is Y-1,
+	retract(enemy_at(N,X,Y)),
+	asserta(enemy_at(N,X,Turn)),!.
+move_enemy(s,N) :-
+	enemy_at(N,X,Y),
+	player_not_around_enemy(N),
+	Z is X+1,
+	\+is_deadzone(Z,Y),
+	retract(enemy_at(N,X,Y)),
+	asserta(enemy_at(N,X,Z)),!.
+move_enemy(s,N) :-
+	enemy_at(N,X,Y),
+	player_not_around_enemy(N),
+	Z is X+1,
+	is_deadzone(Z,Y),
+	Turn is X-1,
+	retract(enemy_at(N,X,Y)),
+	asserta(enemy_at(N,X,Turn)),!.
+move_enemy(e,N) :-
+	enemy_at(N,X,Y),
+	player_not_around_enemy(N),
+	Z is Y-1,
+	\+is_deadzone(X,Z),
+	retract(enemy_at(N,X,Y)),
+	asserta(enemy_at(N,X,Z)),!.
+move_enemy(e,N) :-
+	enemy_at(N,X,Y),
+	player_not_around_enemy(N),
+	Z is Y-1,
+	is_deadzone(X,Z),
+	Turn is Y+1,
+	retract(enemy_at(N,X,Y)),
+	asserta(enemy_at(N,X,Turn)),!.
+move_enemy(_,_).
+
+player_not_around_enemy(N):-
+	player_at(A,B),
+	C is A-1, D is A+1,
+	E is B-1, F is B+1,
+	\+enemy_at(N,A,B),
+	\+enemy_at(N,C,B),
+	\+enemy_at(N,D,B),
+	\+enemy_at(N,A,E),
+	\+enemy_at(N,C,E),
+	\+enemy_at(N,D,E),
+	\+enemy_at(N,A,F),
+	\+enemy_at(N,C,F),
+	\+enemy_at(N,D,F),!.
+
+/*mencek apakah enemy berada di deadzone*/
+
 
 go(n) :-
 	player_at(X,Y),
@@ -272,7 +309,6 @@ go(n) :-
 
 go(n) :- 
 	retract(player_at(X,Y)), 
-	enemy_move,
 	Z is X-1,
 	asserta(player_at(Z,Y)),
 	update.
@@ -338,6 +374,7 @@ update :-
 	Y is X+1,
 	V is X / 7,!,
 	shrink_map(V),
+	random_movement(6),
 	check_win,
 	retract(timer(X)),
 	asserta(timer(Y)).
@@ -347,6 +384,7 @@ update :-
 	Z is X mod 7,
 	Z \= 0,
 	Y is X+1,!,
+	random_movement(6),
 	check_win,
 	retract(timer(X)),
 	asserta(timer(Y)).
@@ -358,6 +396,23 @@ shrink_map(Z) :-
 	assertz( (is_deadzone(_,Y) :- Y =:= Z) ),
 	assertz( (is_deadzone(_,Y) :- Y =:= A) ),
 	write('safe zone telah mengecil!').
+
+kill_enemy_in_deadzone([],[],[]):-!.
+kill_enemy_in_deadzone([N|R],[X|T],[Y|G]):-
+	is_deadzone(X,Y),
+	enemy(N,Health,Armor,Weapon),
+	retract(enemy_at(N,X,Y)),
+	retract(enemy(N,Health,Armor,Weapon)),
+	write('Seorang musuh telah mati oleh deadzone!'),nl,
+	kill_enemy_in_deadzone(R,T,G),!.
+kill_enemy_in_deadzone([N|R],[X|T],[Y|G]):-
+	is_deadzone(X,Y),
+	enemy(N,Health,Armor,Weapon),
+	retract(enemy_at(N,X,Y)),
+	retract(enemy(N,Health,Armor,Weapon)),
+	write('Seorang musuh telah mati oleh deadzone!'),nl,
+	kill_enemy_in_deadzone(R,T,G),!.
+kill_enemy_in_deadzone([_|R],[_|T],[_|G]):- kill_enemy_in_deadzone(R,T,G), !.
 
 
 show_whats_around(X,Y) :- is_deadzone(X,Y), write('X'),!.
@@ -401,7 +456,10 @@ is_there_more(1):- write(', '),!.
 is_there_more(_).
 
 describe(enemy,_,_,1):- write('ada musuh'),!.
-describe(medicine,_,_,1):- write('ada medicine'),!.
+describe(medicine,X,Y,1):- 
+	findall(A,item_at(medicine,A,X,Y),List1), 
+	panjang(List1,B),
+	write_from_list(List1,B),!.
 describe(weapon,X,Y,1):- 
 	findall(A,item_at(weapon,A,X,Y),List1), 
 	panjang(List1,B),
@@ -997,6 +1055,10 @@ calculate_damage(_,_,Armor,Dmg) :-
 	write('Armor musuh terlalu kuat! '),!.
 
 check_win :-
+	findall(N,enemy_at(N,_,_),ListN),
+	findall(X,enemy_at(_,X,_),ListX),
+	findall(Y,enemy_at(_,_,Y),ListY),
+	kill_enemy_in_deadzone(ListN,ListX,ListY),
 	findall(A,enemy_at(A,_,_),List1),
 	panjang(List1,B), B \= 0,!.
 check_win :- 
