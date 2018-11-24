@@ -1,5 +1,5 @@
 /* Data Test*/
-health(100).
+/*health(100).
 armor(vest,20).
 weapon(ak47,50,2).
 inventory(['medicine','pistol','pistol_ammo']).
@@ -10,7 +10,7 @@ player_at(5,5).
 item_at(type,name,x,y).
 item_at(type1,name1,x1,y1).
 item_at(typeammo,nameammo,x,y,nb).
-item_at(typeammo1,nameammo1,x1,y1,nb1).
+item_at(typeammo1,nameammo1,x1,y1,nb1).*/
 
 save(F) :-  open('save_file.pl',write,Stream),
             health(X),write(Stream,health(X)),write(Stream,'.'), nl(Stream),
@@ -24,4 +24,4 @@ save(F) :-  open('save_file.pl',write,Stream),
             forall(item_at(TypeAmmo,NameAmmo,PosIAX,PosIAY,Nb),(write(Stream,item_at(TypeAmmo,NameAmmo,PosIAX,PosIAY,Nb)),write(Stream,'.'),nl(Stream))),
             close(Stream).
 
-load(X) :- consult('main.pl'),['main'].
+load(X) :- consult('save_file.pl'),['save_file'].
