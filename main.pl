@@ -162,6 +162,15 @@ spawn_medicine_position(A):-
 
 /* Fungsi Start */
 start :-
+		write(' ________   __   __  ______     _______ '),nl,
+		write('/    _    )|  | |  ||   _  )   /  _____|'),nl,
+		write('|   | |    |  | |  ||  |_| |  |  |     '),nl,
+		write('|   |_|    |  | |  ||     /   |  |  ____' ),nl,
+		write('|    _____/|  | |  ||   _ |_  |  | |_   |'),nl,
+		write('|   |      |  | |  ||  | |  | |  |   |  |'),nl,
+		write('|   |      |  | |  ||  |_|  | |  |___|  |'),nl,
+		write('|   |      |  |_|  ||       / |         |'),nl,
+		write('|___|      |_______||______/  |________/'),nl,
 		write('Selamat datang di permainan PUBG ecek-ecek.'),
 		write('\nKetik help. untuk melihat command yang tersedia dan ketik map. untuk melihat kondisi kamu sekarang.\n'),
 		help,
