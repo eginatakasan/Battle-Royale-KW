@@ -12,7 +12,7 @@ item_at(type1,name1,x1,y1).
 item_at(typeammo,nameammo,x,y,nb).
 item_at(typeammo1,nameammo1,x1,y1,nb1).*/
 
-save(F) :-  open('save_file.pl',write,Stream),
+save(F) :-  open('save_file.txt',write,Stream),
             health(X),write(Stream,health(X)),write(Stream,'.'), nl(Stream),
             armor(A,Y),write(Stream,armor(A,Y)),write(Stream,'.'),nl(Stream),
             weapon(Z,D,E),write(Stream,weapon(Z,D,E)),write(Stream,'.'),nl(Stream),
@@ -24,4 +24,4 @@ save(F) :-  open('save_file.pl',write,Stream),
             forall(item_at(TypeAmmo,NameAmmo,PosIAX,PosIAY,Nb),(write(Stream,item_at(TypeAmmo,NameAmmo,PosIAX,PosIAY,Nb)),write(Stream,'.'),nl(Stream))),
             close(Stream).
 
-load(X) :- consult('save_file.pl'),['save_file'].
+load(X) :- consult('save_file.txt'),['save_file'].
