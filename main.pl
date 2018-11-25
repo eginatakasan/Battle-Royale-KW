@@ -30,20 +30,16 @@ enemy_at(5,3,3).
 enemy_at(6,3,3).
 enemy_at(7,3,3).
 enemy_at(8,3,3).
-enemy_at(9,3,3).
-enemy_at(10,3,3).
 
 /*deklarasi item*/
-enemy(1,100,0,pistol).  /* enemy(NomorEnemy,HealthEnemy,ArmorEnemy,WeaponEnemy) */
+enemy(1,100,20,pistol).  /* enemy(NomorEnemy,HealthEnemy,ArmorEnemy,WeaponEnemy) */
 enemy(2,100,5,pistol).
-enemy(3,100,20,ak47).
+enemy(3,100,10,ak47).
 enemy(4,100,5,hand).
 enemy(5,100,20,frying_pan).
-enemy(6,100,5,chicken).
-enemy(7,100,5,hand).
-enemy(8,100,20,frying_pan).
-enemy(9,100,5,chicken).
-enemy(10,100,5,pistol).
+enemy(6,100,5,hand).
+enemy(7,100,20,hand).
+enemy(8,100,0,shotgun).
 item(weapon,ak47).
 item(weapon,pistol).
 item(weapon,chicken).
@@ -183,8 +179,6 @@ start :-
 		spawn_enemy_position(6),
 		spawn_enemy_position(7),
 		spawn_enemy_position(8),
-		spawn_enemy_position(9),
-		spawn_enemy_position(10),
 		spawn_weapon_position(10),
 		spawn_armor_position(8),
 		spawn_medicine_position(20),
