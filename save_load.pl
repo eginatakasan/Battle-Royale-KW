@@ -56,14 +56,14 @@ reading(File):-
 
 make_deadzone(X,X):-!.
 make_deadzone(A,X):-
-	Z is A mod 7,
+	Z is A mod 8,
 	Z =:= 0,
-	V is X / 7,
+	V is X / 8,
 	shrink_map(V),
 	B is A+1,
 	make_deadzone(B,X),!.
 make_deadzone(A,X):-
-	Z is A mod 7,
+	Z is A mod 8,
 	Z \=0,
 	B is A+1,
 	make_deadzone(B,X),!.
