@@ -387,6 +387,7 @@ update :-
 	player_at(A,B),
 	kill_player_in_deadzone(A,B),
 	check_win,
+	supply_drop,
 	retract(timer(X)),
 	asserta(timer(Y)),!.
 
@@ -1107,5 +1108,22 @@ check_win :-
 	findall(A,enemy_at(A,_,_),List1),
 	panjang(List1,B), B =:= 0,
 	write('***** Kamu Menang *****'),halt.
+
+supply_drop:-
+	random(1,15,X),
+	random(1,15,Y),
+	add_supply_drop(X,Y),!.
+
+add_supply_drop(X,Y):-
+	is_deadzone(X,Y),
+	supply_drop,!.
+add_supply_drop(X,Y):-
+	\+is_deadzone(X,Y),
+	choose([helmet,vest],Armor),
+	choose([ak47,shotgun],Weapon),
+	asserta(item_at(armor,Armor,X,Y)),
+	asserta(item_at(weapon,Weapon,X,Y)),
+	write('Kamu melihat supply drop dijatuhkan di lokasi '), write(X),write(','),write(Y),nl,!.
+
 
 end_game :- write('***** Game Over *****'), halt.
