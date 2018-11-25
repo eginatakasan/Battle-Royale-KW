@@ -180,10 +180,10 @@ start :-
 
 
 /*fungsi gerak*/
-n :- go(n).
-e :- go(e).
-s :- go(s).
-w :- go(w).
+n :- go(n),!.
+e :- go(e),!.
+s :- go(s),!.
+w :- go(w),!.
 
 look :- 
 	write_legend,nl,
@@ -358,26 +358,15 @@ update :-
 	Z is X mod 7,
 	Z =:= 0,
 	Y is X+1,
-	V is X / 7,!,
+	V is X / 7,
 	shrink_map(V),
-	retract(timer(X)),
-	asserta(timer(Y)),
+	write('safe zone telah mengecil!'),nl,
 	player_at(A,B),
-	is_deadzone(A,B),
-	write('Anda memasuki dead zone!'),nl,
-	end_game.
-
-update :-
-	timer(X),
-	Z is X mod 7,
-	Z =:= 0,
-	Y is X+1,
-	V is X / 7,!,
-	shrink_map(V),
+	kill_player_in_deadzone(A,B),
 	random_movement(6),
 	check_win,
 	retract(timer(X)),
-	asserta(timer(Y)).
+	asserta(timer(Y)),!.
 
 update :-
 	timer(X),
@@ -394,8 +383,13 @@ shrink_map(Z) :-
 	asserta( (is_deadzone(X,_) :- X =:= Z) ),
 	asserta( (is_deadzone(X,_) :- X =:= A) ),
 	assertz( (is_deadzone(_,Y) :- Y =:= Z) ),
-	assertz( (is_deadzone(_,Y) :- Y =:= A) ),
-	write('safe zone telah mengecil!').
+	assertz( (is_deadzone(_,Y) :- Y =:= A) ),!.
+
+kill_player_in_deadzone(X,Y):-
+	is_deadzone(X,Y),
+	write('Anda memasuki deadzone!'),nl,
+	end_game.
+kill_player_in_deadzone(_,_):-!.
 
 kill_enemy_in_deadzone([],[],[]):-!.
 kill_enemy_in_deadzone([N|R],[X|T],[Y|G]):-
@@ -537,7 +531,6 @@ take(X) :-
 	M+N < 5,
 	player_at(Y,Z),
  	item_at(F,X,Y,Z),
-	\+item(ammo,X),
 	asserta(inventory(X)),
 	retract(item_at(F,X,Y,Z)),
 	write(X), write(' diambil'), !. 
