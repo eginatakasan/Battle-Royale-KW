@@ -1,21 +1,21 @@
-:- include('winston.pl').
+:- include('save_load.pl').
 
 /* Compiler: GNU Prolog */
 /* :-dynamic diperlukan untuk buat fakta yang bisa diubah */
 /* retract artinya menghapus fakta atau rule dari database */
 /* asserta artinya menambah fakta atau rule dari database ditaruh di awal database*/
 /* assertz artinya menambah fakta atau rule dari database ditaruh di akhir database*/
+
 :- dynamic(player_at/2). 
 :- dynamic(is_deadzone/2).
 :- dynamic(timer/1).
 :- dynamic(inventory/1).
-:- dynamic(inventory/2).	/* khusus ammo */
+:- dynamic(inventory/2).	
 :- dynamic(equipped_weapon/2).
 :- dynamic(equipped_armor/1).
 :- dynamic(item_at/4).
-:- dynamic(item_at/5). /* khusus ammo */
+:- dynamic(item_at/5). 
 :- dynamic(health/1).
-:- dynamic(ammo/2).
 :- dynamic(enemy_at/3).
 :- dynamic(enemy/4).
 
@@ -502,6 +502,18 @@ write_legend :-
 /*fungsi untuk menghitung jumlah fakta*/
 panjang([ ],0).
 panjang([_|T],X) :- panjang(T,Length), X is Length+1.
+
+/*fungsi ngecek status*/
+status :-
+	equipped_armor(Armor),
+	health(H),
+	equipped_weapon(Weapon,Ammo),
+	write('Health   :'), write(H), nl,
+	write('Armor    :'), write(Armor),nl,
+	write('Weapon   :'), write(Weapon), nl,
+	write('Ammo     :'),write(Ammo),nl,
+	write('Inventory :'), lihatinv.
+
 
 /*fungsi take*/
 take(X) :- 
