@@ -215,9 +215,9 @@ look :-
 	write('Di West '),listing_stuff(X,B),nl,
 	write('Di dekat kamu '),listing_stuff(X,Y),nl,
 	write('Di East '),listing_stuff(X,C),nl,
-	write('Di SouthEast '),listing_stuff(D,B),nl,
+	write('Di SouthWest '),listing_stuff(D,B),nl,
 	write('Di South '),listing_stuff(D,Y),nl,
-	write('Di SouthWest '),listing_stuff(D,C),nl.
+	write('Di SouthEast '),listing_stuff(D,C),nl.
 
 
 /*randoming enemy move*/
